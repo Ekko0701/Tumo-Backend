@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: Tumo
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/tumo
+    username: tumo
+    password: tumo
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: true
+    open-in-view: false
+
+server:
+  port: 8080
