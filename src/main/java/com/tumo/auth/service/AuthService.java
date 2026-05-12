@@ -1,5 +1,7 @@
 package com.tumo.auth.service;
 
+import com.tumo.auth.dto.LoginRequest;
+import com.tumo.auth.dto.LoginResponse;
 import com.tumo.auth.dto.SignupRequest;
 import com.tumo.auth.dto.SignupResponse;
 import com.tumo.global.error.BusinessException;
@@ -15,6 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class AuthService {
+
+    private static final String TEMP_ACCESS_TOKEN = "temp-access-token";
+    private static final String TOKEN_TYPE = "Bearer";
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -36,5 +41,16 @@ public class AuthService {
         User savedUser = userRepository.save(user);
 
         return SignupResponse.from(savedUser);
+    }
+
+    public LoginResponse login(LoginRequest request) {
+        User user = userRepository.findByEmail(request.email())
+                .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_LOGIN));
+
+        if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
+            throw new BusinessException(ErrorCode.INVALID_LOGIN);
+        }
+
+        return new LoginResponse(TEMP_ACCESS_TOKEN, TOKEN_TYPE);
     }
 }

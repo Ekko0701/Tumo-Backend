@@ -19,6 +19,11 @@ public enum ErrorCode {
     DUPLICATED_EMAIL(HttpStatus.CONFLICT, "DUPLICATED_EMAIL", "이미 사용 중인 이메일입니다."),
 
     /**
+     * 로그인 시 이메일 또는 비밀번호가 일치하지 않는 경우.
+     */
+    INVALID_LOGIN(HttpStatus.UNAUTHORIZED, "INVALID_LOGIN", "이메일 또는 비밀번호가 올바르지 않습니다."),
+
+    /**
      * 서버 내부에서 예상하지 못한 오류가 발생한 경우.
      */
     INTERNAL_SERVER_ERROR(
