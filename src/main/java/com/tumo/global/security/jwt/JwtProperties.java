@@ -1,4 +1,4 @@
-package com.tumo.auth.jwt;
+package com.tumo.global.security.jwt;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
