@@ -4,6 +4,7 @@ import com.tumo.auth.dto.LoginRequest;
 import com.tumo.auth.dto.LoginResponse;
 import com.tumo.auth.dto.SignupRequest;
 import com.tumo.auth.dto.SignupResponse;
+import com.tumo.auth.jwt.JwtTokenProvider;
 import com.tumo.global.error.BusinessException;
 import com.tumo.global.error.ErrorCode;
 import com.tumo.user.domain.User;
@@ -18,11 +19,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class AuthService {
 
-    private static final String TEMP_ACCESS_TOKEN = "temp-access-token";
     private static final String TOKEN_TYPE = "Bearer";
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Transactional
     public SignupResponse signup(SignupRequest request) {
@@ -51,6 +52,8 @@ public class AuthService {
             throw new BusinessException(ErrorCode.INVALID_LOGIN);
         }
 
-        return new LoginResponse(TEMP_ACCESS_TOKEN, TOKEN_TYPE);
+        String accessToken = jwtTokenProvider.createAccessToken(user.getId());
+
+        return new LoginResponse(accessToken, TOKEN_TYPE);
     }
 }
