@@ -4,6 +4,7 @@ import com.tumo.auth.dto.LoginRequest;
 import com.tumo.auth.dto.LoginResponse;
 import com.tumo.auth.dto.SignupRequest;
 import com.tumo.auth.dto.SignupResponse;
+import com.tumo.auth.dto.TokenRefreshRequest;
 import com.tumo.auth.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,5 +31,10 @@ public class AuthController {
     @PostMapping("/login")
     public LoginResponse login(@Valid @RequestBody LoginRequest request) {
         return authService.login(request);
+    }
+
+    @PostMapping("/token/refresh")
+    public LoginResponse refreshToken(@Valid @RequestBody TokenRefreshRequest request) {
+        return authService.refreshToken(request);
     }
 }

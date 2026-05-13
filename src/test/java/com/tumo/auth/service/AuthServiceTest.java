@@ -1,6 +1,7 @@
 package com.tumo.auth.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
@@ -9,7 +10,10 @@ import static org.mockito.Mockito.verify;
 import com.tumo.auth.domain.RefreshToken;
 import com.tumo.auth.dto.LoginRequest;
 import com.tumo.auth.dto.LoginResponse;
+import com.tumo.auth.dto.TokenRefreshRequest;
 import com.tumo.auth.repository.RefreshTokenRepository;
+import com.tumo.global.error.BusinessException;
+import com.tumo.global.error.ErrorCode;
 import com.tumo.global.security.jwt.JwtProperties;
 import com.tumo.global.security.jwt.JwtTokenProvider;
 import com.tumo.user.domain.User;
@@ -94,5 +98,73 @@ class AuthServiceTest {
         assertThat(response.tokenType()).isEqualTo("Bearer");
         assertThat(refreshToken.getToken()).isEqualTo("new-refresh-token");
         assertThat(refreshToken.getExpiresAt()).isAfter(LocalDateTime.now());
+    }
+
+    @Test
+    void refreshToken() {
+        User user = new User("test@example.com", "encoded-password", "tester");
+        ReflectionTestUtils.setField(user, "id", 1L);
+        RefreshToken refreshToken = new RefreshToken(
+                user,
+                "old-refresh-token",
+                LocalDateTime.now().plusDays(1)
+        );
+        given(jwtTokenProvider.validateToken("old-refresh-token")).willReturn(true);
+        given(jwtTokenProvider.getUserId("old-refresh-token")).willReturn(1L);
+        given(refreshTokenRepository.findByToken("old-refresh-token")).willReturn(Optional.of(refreshToken));
+        given(jwtTokenProvider.createAccessToken(1L)).willReturn("new-access-token");
+        given(jwtTokenProvider.createRefreshToken(1L)).willReturn("new-refresh-token");
+        given(jwtProperties.refreshTokenExpirationMillis()).willReturn(1209600000L);
+
+        LoginResponse response = authService.refreshToken(new TokenRefreshRequest("old-refresh-token"));
+
+        assertThat(response.accessToken()).isEqualTo("new-access-token");
+        assertThat(response.refreshToken()).isEqualTo("new-refresh-token");
+        assertThat(response.tokenType()).isEqualTo("Bearer");
+        assertThat(refreshToken.getToken()).isEqualTo("new-refresh-token");
+        assertThat(refreshToken.getExpiresAt()).isAfter(LocalDateTime.now());
+    }
+
+    @Test
+    void refreshTokenThrowsExceptionWhenJwtIsInvalid() {
+        given(jwtTokenProvider.validateToken("invalid-refresh-token")).willReturn(false);
+
+        assertThatThrownBy(() -> authService.refreshToken(new TokenRefreshRequest("invalid-refresh-token")))
+                .isInstanceOfSatisfying(BusinessException.class, exception ->
+                        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.INVALID_TOKEN)
+                );
+
+        verify(refreshTokenRepository, never()).findByToken("invalid-refresh-token");
+    }
+
+    @Test
+    void refreshTokenThrowsExceptionWhenStoredTokenDoesNotExist() {
+        given(jwtTokenProvider.validateToken("missing-refresh-token")).willReturn(true);
+        given(jwtTokenProvider.getUserId("missing-refresh-token")).willReturn(1L);
+        given(refreshTokenRepository.findByToken("missing-refresh-token")).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> authService.refreshToken(new TokenRefreshRequest("missing-refresh-token")))
+                .isInstanceOfSatisfying(BusinessException.class, exception ->
+                        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.INVALID_TOKEN)
+                );
+    }
+
+    @Test
+    void refreshTokenThrowsExceptionWhenStoredTokenIsExpired() {
+        User user = new User("test@example.com", "encoded-password", "tester");
+        ReflectionTestUtils.setField(user, "id", 1L);
+        RefreshToken refreshToken = new RefreshToken(
+                user,
+                "expired-refresh-token",
+                LocalDateTime.now().minusSeconds(1)
+        );
+        given(jwtTokenProvider.validateToken("expired-refresh-token")).willReturn(true);
+        given(jwtTokenProvider.getUserId("expired-refresh-token")).willReturn(1L);
+        given(refreshTokenRepository.findByToken("expired-refresh-token")).willReturn(Optional.of(refreshToken));
+
+        assertThatThrownBy(() -> authService.refreshToken(new TokenRefreshRequest("expired-refresh-token")))
+                .isInstanceOfSatisfying(BusinessException.class, exception ->
+                        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.INVALID_TOKEN)
+                );
     }
 }

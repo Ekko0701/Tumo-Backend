@@ -174,6 +174,54 @@ POST /api/v1/auth/login
 - 로그인 실패 시 어떤 값이 틀렸는지 구체적으로 노출하지 않는다.
 - 로그인 성공 시 사용자별 Refresh Token을 저장하거나 기존 값을 교체한다.
 
+---
+
+### 1.3 Access Token 재발급
+
+```http
+POST /api/v1/auth/token/refresh
+```
+
+Refresh Token으로 새 Access Token과 새 Refresh Token을 발급한다.
+
+#### Request
+
+```json
+{
+  "refreshToken": "jwt-refresh-token"
+}
+```
+
+#### Request Fields
+
+| 필드 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| refreshToken | String | Y | Access Token 재발급에 사용할 Refresh Token |
+
+#### Response
+
+```json
+{
+  "accessToken": "new-jwt-access-token",
+  "refreshToken": "new-jwt-refresh-token",
+  "tokenType": "Bearer"
+}
+```
+
+#### Response Fields
+
+| 필드 | 타입 | 설명 |
+|------|------|------|
+| accessToken | String | API 인증에 사용할 새 JWT |
+| refreshToken | String | 다음 재발급에 사용할 새 JWT |
+| tokenType | String | 토큰 타입. Phase 1에서는 `Bearer` 고정 |
+
+#### 정책
+
+- Refresh Token이 유효하지 않으면 재발급에 실패한다.
+- DB에 저장된 Refresh Token과 요청 Refresh Token이 일치해야 한다.
+- 재발급 성공 시 기존 Refresh Token을 새 Refresh Token으로 교체한다.
+
 ## 2. 시세 API
 
 ### 2.1 종목 목록 조회
@@ -413,6 +461,7 @@ Authorization: Bearer {accessToken}
 |--------|----------|------|------|
 | POST | `/api/v1/auth/signup` | N | 회원가입 |
 | POST | `/api/v1/auth/login` | N | 로그인 |
+| POST | `/api/v1/auth/token/refresh` | N | Access Token 재발급 |
 | GET | `/api/v1/stocks` | Y | 종목 목록 조회 |
 | GET | `/api/v1/stocks/{stockCode}` | Y | 종목 상세 조회 |
 | POST | `/api/v1/orders` | Y | 매수 주문 |

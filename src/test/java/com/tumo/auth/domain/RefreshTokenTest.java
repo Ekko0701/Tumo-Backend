@@ -20,4 +20,15 @@ class RefreshTokenTest {
         assertThat(refreshToken.getToken()).isEqualTo("new-refresh-token");
         assertThat(refreshToken.getExpiresAt()).isEqualTo(newExpiresAt);
     }
+
+    @Test
+    void isExpired() {
+        User user = new User("test@example.com", "encoded-password", "tester");
+        LocalDateTime now = LocalDateTime.now();
+        RefreshToken expiredRefreshToken = new RefreshToken(user, "expired-refresh-token", now.minusSeconds(1));
+        RefreshToken validRefreshToken = new RefreshToken(user, "valid-refresh-token", now.plusSeconds(1));
+
+        assertThat(expiredRefreshToken.isExpired(now)).isTrue();
+        assertThat(validRefreshToken.isExpired(now)).isFalse();
+    }
 }
