@@ -132,7 +132,7 @@ POST /api/v1/auth/signup
 POST /api/v1/auth/login
 ```
 
-이메일과 비밀번호로 로그인하고 JWT access token을 발급한다.
+이메일과 비밀번호로 로그인하고 JWT access token과 refresh token을 발급한다.
 
 #### Request
 
@@ -155,6 +155,7 @@ POST /api/v1/auth/login
 ```json
 {
   "accessToken": "jwt-access-token",
+  "refreshToken": "jwt-refresh-token",
   "tokenType": "Bearer"
 }
 ```
@@ -164,12 +165,14 @@ POST /api/v1/auth/login
 | 필드 | 타입 | 설명 |
 |------|------|------|
 | accessToken | String | API 인증에 사용할 JWT |
+| refreshToken | String | Access Token 재발급에 사용할 JWT |
 | tokenType | String | 토큰 타입. Phase 1에서는 `Bearer` 고정 |
 
 #### 정책
 
 - 이메일 또는 비밀번호가 일치하지 않으면 로그인에 실패한다.
 - 로그인 실패 시 어떤 값이 틀렸는지 구체적으로 노출하지 않는다.
+- 로그인 성공 시 사용자별 Refresh Token을 저장하거나 기존 값을 교체한다.
 
 ## 2. 시세 API
 

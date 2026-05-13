@@ -10,6 +10,11 @@ public record LoginResponse(
         String accessToken,
 
         /**
+         * Access token 재발급에 사용할 refresh token.
+         */
+        String refreshToken,
+
+        /**
          * 토큰 타입.
          */
         String tokenType

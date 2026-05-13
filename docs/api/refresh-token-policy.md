@@ -193,7 +193,6 @@ REFRESH_TOKEN_NOT_FOUND
 ## 구현 예정
 
 ```text
-로그인 시 Refresh Token 저장 및 응답
 토큰 재발급 API 추가
 로그아웃 시 Refresh Token 폐기
 ```
@@ -206,4 +205,5 @@ application.yaml에 refresh-token-expiration-millis 설정 추가
 JwtProperties에 refresh-token-expiration-millis 바인딩 추가
 JwtTokenProvider에 createRefreshToken 추가
 RefreshToken Entity/Repository 추가
+로그인 시 Refresh Token 저장 및 응답
 ```
