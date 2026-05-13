@@ -61,4 +61,16 @@ public class Holding {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
+
+    /**
+     * 추가 매수 수량과 체결가를 현재 보유 상태에 반영하고 평균 매입가를 재계산한다.
+     */
+    public void buy(Long quantity, Long price) {
+        long totalQuantity = this.quantity + quantity;
+        long totalAmount = this.averagePrice * this.quantity + price * quantity;
+
+        this.quantity = totalQuantity;
+        this.averagePrice = totalAmount / totalQuantity;
+        this.updatedAt = LocalDateTime.now();
+    }
 }

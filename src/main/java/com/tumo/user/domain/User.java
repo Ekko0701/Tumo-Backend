@@ -1,5 +1,7 @@
 package com.tumo.user.domain;
 
+import com.tumo.global.error.BusinessException;
+import com.tumo.global.error.ErrorCode;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -47,6 +49,15 @@ public class User {
         this.nickname = nickname;
         this.cashBalance = INITIAL_CASH_BALANCE;
         this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void decreaseCashBalance(Long amount) {
+        if (cashBalance < amount) {
+            throw new BusinessException(ErrorCode.INSUFFICIENT_CASH);
+        }
+
+        this.cashBalance -= amount;
         this.updatedAt = LocalDateTime.now();
     }
 }

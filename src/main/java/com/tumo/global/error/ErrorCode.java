@@ -49,6 +49,11 @@ public enum ErrorCode {
     STOCK_NOT_FOUND(HttpStatus.NOT_FOUND, "STOCK_NOT_FOUND", "종목을 찾을 수 없습니다."),
 
     /**
+     * 주문 금액이 사용자의 현금 잔고보다 큰 경우.
+     */
+    INSUFFICIENT_CASH(HttpStatus.BAD_REQUEST, "INSUFFICIENT_CASH", "현금 잔고가 부족합니다."),
+
+    /**
      * 서버 내부에서 예상하지 못한 오류가 발생한 경우.
      */
     INTERNAL_SERVER_ERROR(

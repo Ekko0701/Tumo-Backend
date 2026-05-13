@@ -102,6 +102,7 @@ ErrorResponse.of(ErrorCode.INVALID_REQUEST, fieldErrors)
 | HTTP Status | code | message | 설명 |
 |-------------|------|---------|------|
 | 400 | INVALID_REQUEST | 요청값이 올바르지 않습니다. | 요청 DTO 검증 실패, 요청 본문 누락/형식 오류, 필수 파라미터 누락, 파라미터 타입 오류 |
+| 400 | INSUFFICIENT_CASH | 현금 잔고가 부족합니다. | 주문 금액이 사용자의 현금 잔고보다 큰 경우 |
 | 401 | INVALID_LOGIN | 이메일 또는 비밀번호가 올바르지 않습니다. | 로그인 인증 실패 |
 | 401 | INVALID_TOKEN | 인증 토큰이 유효하지 않습니다. | 인증 토큰 없음, 만료, 형식 오류, 서명 검증 실패 |
 | 404 | NOT_FOUND | 요청한 리소스를 찾을 수 없습니다. | 존재하지 않는 API 경로 또는 리소스 |
@@ -118,6 +119,9 @@ ErrorResponse.of(ErrorCode.INVALID_REQUEST, fieldErrors)
 ```text
 INVALID_REQUEST
 → fieldErrors를 확인해 입력 필드별 안내 문구 표시
+
+INSUFFICIENT_CASH
+→ 주문 가능 금액 부족 안내 표시
 
 DUPLICATED_EMAIL
 → 이메일 중복 안내 표시
