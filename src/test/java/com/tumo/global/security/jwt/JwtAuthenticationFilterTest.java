@@ -24,7 +24,7 @@ class JwtAuthenticationFilterTest {
     @BeforeEach
     void setUp() {
         SecurityContextHolder.clearContext();
-        jwtTokenProvider = new JwtTokenProvider(new JwtProperties(SECRET, 3600000L));
+        jwtTokenProvider = new JwtTokenProvider(new JwtProperties(SECRET, 3600000L, 1209600000L));
         jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtTokenProvider);
     }
 

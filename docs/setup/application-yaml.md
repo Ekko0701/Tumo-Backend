@@ -24,6 +24,11 @@ spring:
 
 server:
   port: 8080
+
+jwt:
+  secret: tumo-local-development-secret-key-must-be-at-least-32-bytes
+  access-token-expiration-millis: 3600000
+  refresh-token-expiration-millis: 1209600000
 ```
 
 ## spring
@@ -190,6 +195,51 @@ http://localhost:8080
 http://localhost:8080/health
 ```
 
+## jwt
+
+```yaml
+jwt:
+  secret: tumo-local-development-secret-key-must-be-at-least-32-bytes
+  access-token-expiration-millis: 3600000
+  refresh-token-expiration-millis: 1209600000
+```
+
+JWT 발급과 검증에 사용하는 설정이다.
+
+### secret
+
+```yaml
+  secret: tumo-local-development-secret-key-must-be-at-least-32-bytes
+```
+
+JWT signature 생성과 검증에 사용하는 개발용 비밀값이다.
+
+운영 환경에서는 환경변수 또는 Secret Manager로 분리하는 것이 좋다.
+
+### access-token-expiration-millis
+
+```yaml
+  access-token-expiration-millis: 3600000
+```
+
+Access Token 만료 시간이다.
+
+```text
+3600000ms = 1시간
+```
+
+### refresh-token-expiration-millis
+
+```yaml
+  refresh-token-expiration-millis: 1209600000
+```
+
+Refresh Token 만료 시간이다.
+
+```text
+1209600000ms = 14일
+```
+
 ## 요약
 
 이 설정은 다음 의미를 가진다.
@@ -201,4 +251,6 @@ DB 계정은 tumo / tumo를 사용한다.
 개발 중에는 JPA Entity 기준으로 DB 스키마를 자동 갱신한다.
 실행되는 SQL을 콘솔에 출력하고 보기 좋게 포맷한다.
 서버는 8080 포트에서 실행한다.
+JWT Access Token은 1시간 동안 유효하다.
+JWT Refresh Token은 14일 동안 유효하다.
 ```

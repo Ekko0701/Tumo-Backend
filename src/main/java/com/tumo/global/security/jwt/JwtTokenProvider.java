@@ -19,8 +19,16 @@ public class JwtTokenProvider {
     private final JwtProperties jwtProperties;
 
     public String createAccessToken(Long userId) {
+        return createToken(userId, jwtProperties.accessTokenExpirationMillis());
+    }
+
+    public String createRefreshToken(Long userId) {
+        return createToken(userId, jwtProperties.refreshTokenExpirationMillis());
+    }
+
+    private String createToken(Long userId, long expirationMillis) {
         Date now = new Date();
-        Date expiration = new Date(now.getTime() + jwtProperties.accessTokenExpirationMillis());
+        Date expiration = new Date(now.getTime() + expirationMillis);
 
         return Jwts.builder()
                 .subject(String.valueOf(userId))

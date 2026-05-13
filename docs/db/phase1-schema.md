@@ -163,6 +163,43 @@ INDEX (stock_code)
 - 이미 보유 중인 종목이면 수량과 평균 매입가를 갱신한다.
 - Phase 1에서는 매도 주문이 없으므로 보유 수량 감소는 발생하지 않는다.
 
+## 4. refresh_tokens
+
+사용자별 Refresh Token을 저장한다.
+
+초기 구현에서는 사용자당 유효한 Refresh Token을 1개만 유지한다.
+
+### 컬럼
+
+| 컬럼 | 타입 | Java 타입 | Nullable | 제약/기본값 | 설명 |
+|------|------|-----------|----------|-------------|------|
+| id | BIGSERIAL | Long | N | PK | Refresh Token ID |
+| user_id | BIGINT | User | N | FK, UNIQUE | 토큰 소유 사용자 |
+| token | VARCHAR(512) | String | N | UNIQUE | Refresh Token 문자열 |
+| expires_at | TIMESTAMP | LocalDateTime | N | | 만료 시각 |
+| created_at | TIMESTAMP | LocalDateTime | N | | 생성 시각 |
+
+### 외래 키
+
+```sql
+refresh_tokens.user_id -> users.id
+```
+
+### 제약
+
+```sql
+UNIQUE (user_id)
+UNIQUE (token)
+```
+
+### 정책
+
+- Refresh Token은 서버 DB에 저장한다.
+- 사용자당 유효한 Refresh Token은 1개만 유지한다.
+- 같은 사용자가 다시 로그인하면 기존 Refresh Token을 교체한다.
+- Access Token 재발급 요청 시 요청 token과 DB 저장 token을 비교한다.
+- 로그아웃 시 해당 사용자의 Refresh Token을 삭제한다.
+
 ## 평균 매입가 계산
 
 같은 종목을 추가 매수하면 평균 매입가를 다음 공식으로 갱신한다.
@@ -229,6 +266,7 @@ profitRate = (totalAsset - 10000000) / 10000000 * 100
 ```text
 users 1 ─── N orders
 users 1 ─── N portfolios
+users 1 ─── 1 refresh_tokens
 ```
 
 ## Phase 1 이후 확장 예정
@@ -240,7 +278,6 @@ stocks
 seasons
 groups
 rankings
-refresh_tokens
 ```
 
 Phase 1에서는 외부 시세 API 또는 mock 데이터를 사용하므로 별도의 `stocks` 테이블은 만들지 않는다.

@@ -9,6 +9,7 @@ docs/
 ├── api/
 │   ├── error-response.md
 │   ├── jwt-authentication.md
+│   ├── refresh-token-policy.md
 │   └── phase1.md
 ├── db/
 │   └── phase1-schema.md
@@ -32,5 +33,6 @@ docs/
 - [API 명세](api/phase1.md)
 - [에러 응답 형식](api/error-response.md)
 - [JWT 인증](api/jwt-authentication.md)
+- [Refresh Token 정책](api/refresh-token-policy.md)
 - [DB 스키마](db/phase1-schema.md)
 - [application.yaml 설정](setup/application-yaml.md)

@@ -22,3 +22,4 @@ server:
 jwt:
   secret: tumo-local-development-secret-key-must-be-at-least-32-bytes
   access-token-expiration-millis: 3600000
+  refresh-token-expiration-millis: 1209600000

@@ -13,7 +13,7 @@ class JwtTokenProviderTest {
 
     @Test
     void createAccessToken() {
-        JwtTokenProvider jwtTokenProvider = new JwtTokenProvider(new JwtProperties(SECRET, 3600000L));
+        JwtTokenProvider jwtTokenProvider = new JwtTokenProvider(new JwtProperties(SECRET, 3600000L, 1209600000L));
 
         String accessToken = jwtTokenProvider.createAccessToken(1L);
 
@@ -22,15 +22,25 @@ class JwtTokenProviderTest {
     }
 
     @Test
+    void createRefreshToken() {
+        JwtTokenProvider jwtTokenProvider = new JwtTokenProvider(new JwtProperties(SECRET, 3600000L, 1209600000L));
+
+        String refreshToken = jwtTokenProvider.createRefreshToken(1L);
+
+        assertThat(jwtTokenProvider.validateToken(refreshToken)).isTrue();
+        assertThat(jwtTokenProvider.getUserId(refreshToken)).isEqualTo(1L);
+    }
+
+    @Test
     void validateTokenReturnsFalseWhenTokenIsInvalid() {
-        JwtTokenProvider jwtTokenProvider = new JwtTokenProvider(new JwtProperties(SECRET, 3600000L));
+        JwtTokenProvider jwtTokenProvider = new JwtTokenProvider(new JwtProperties(SECRET, 3600000L, 1209600000L));
 
         assertThat(jwtTokenProvider.validateToken("invalid-token")).isFalse();
     }
 
     @Test
     void validateTokenReturnsFalseWhenTokenIsExpired() {
-        JwtTokenProvider jwtTokenProvider = new JwtTokenProvider(new JwtProperties(SECRET, -1000L));
+        JwtTokenProvider jwtTokenProvider = new JwtTokenProvider(new JwtProperties(SECRET, -1000L, -1000L));
 
         String expiredToken = jwtTokenProvider.createAccessToken(1L);
 
@@ -38,8 +48,17 @@ class JwtTokenProviderTest {
     }
 
     @Test
+    void validateTokenReturnsFalseWhenRefreshTokenIsExpired() {
+        JwtTokenProvider jwtTokenProvider = new JwtTokenProvider(new JwtProperties(SECRET, 3600000L, -1000L));
+
+        String expiredToken = jwtTokenProvider.createRefreshToken(1L);
+
+        assertThat(jwtTokenProvider.validateToken(expiredToken)).isFalse();
+    }
+
+    @Test
     void getUserIdThrowsExceptionWhenTokenIsInvalid() {
-        JwtTokenProvider jwtTokenProvider = new JwtTokenProvider(new JwtProperties(SECRET, 3600000L));
+        JwtTokenProvider jwtTokenProvider = new JwtTokenProvider(new JwtProperties(SECRET, 3600000L, 1209600000L));
 
         assertThatThrownBy(() -> jwtTokenProvider.getUserId("invalid-token"))
                 .isInstanceOfSatisfying(BusinessException.class, exception ->
