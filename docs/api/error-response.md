@@ -102,6 +102,9 @@ ErrorResponse.of(ErrorCode.INVALID_REQUEST, fieldErrors)
 | HTTP Status | code | message | 설명 |
 |-------------|------|---------|------|
 | 400 | INVALID_REQUEST | 요청값이 올바르지 않습니다. | 요청 DTO 검증 실패 |
+| 401 | INVALID_LOGIN | 이메일 또는 비밀번호가 올바르지 않습니다. | 로그인 인증 실패 |
+| 401 | INVALID_TOKEN | 인증 토큰이 유효하지 않습니다. | 인증 토큰 없음, 만료, 형식 오류, 서명 검증 실패 |
+| 404 | USER_NOT_FOUND | 사용자를 찾을 수 없습니다. | 인증된 사용자 식별자에 해당하는 회원 없음 |
 | 409 | DUPLICATED_EMAIL | 이미 사용 중인 이메일입니다. | 회원가입 이메일 중복 |
 | 500 | INTERNAL_SERVER_ERROR | 서버 내부 오류가 발생했습니다. | 예상하지 못한 서버 오류 |
 
@@ -115,6 +118,12 @@ INVALID_REQUEST
 
 DUPLICATED_EMAIL
 → 이메일 중복 안내 표시
+
+INVALID_LOGIN
+→ 로그인 실패 안내 표시
+
+INVALID_TOKEN
+→ 로그인 만료 또는 재로그인 안내 표시
 
 INTERNAL_SERVER_ERROR
 → 일반 서버 오류 안내 표시
@@ -172,4 +181,23 @@ Controller 파라미터의 @Valid 검증 실패
 → GlobalExceptionHandler가 Exception 처리
 → 서버 로그에 stack trace 기록
 → INTERNAL_SERVER_ERROR 응답
+```
+
+### 인증 실패
+
+```text
+보호 API 요청에 인증 정보가 없거나 유효하지 않은 JWT 포함
+→ Spring Security Filter Chain에서 인증 실패 판단
+→ JwtAuthenticationEntryPoint가 401 응답 생성
+→ INVALID_TOKEN 응답
+```
+
+예시 응답:
+
+```json
+{
+  "code": "INVALID_TOKEN",
+  "message": "인증 토큰이 유효하지 않습니다.",
+  "fieldErrors": []
+}
 ```

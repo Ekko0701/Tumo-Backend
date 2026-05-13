@@ -290,16 +290,16 @@ JwtTokenProvider 생성
 JWT 유효성 검증
 JWT에서 userId 추출
 INVALID_TOKEN 에러 코드 추가
+JWT 인증 필터
+인증 실패 공통 응답
 ```
 
 구현 예정:
 
 ```text
-Authorization 헤더에서 JWT 추출
-JWT 인증 필터
-SecurityContext 인증 정보 저장
-인증 실패 공통 응답 정리
-/api/v1/users/me 같은 보호 API
+Refresh Token 도입
+로그아웃 처리
+권한/역할 기반 인가
 ```
 
 ## 핵심 정리
