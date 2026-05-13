@@ -31,7 +31,9 @@ public class SecurityConfig {
                                 "/health",
                                 "/api/v1/auth/signup",
                                 "/api/v1/auth/login",
-                                "/api/v1/auth/token/refresh"
+                                "/api/v1/auth/token/refresh",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
