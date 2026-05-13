@@ -101,10 +101,12 @@ ErrorResponse.of(ErrorCode.INVALID_REQUEST, fieldErrors)
 
 | HTTP Status | code | message | 설명 |
 |-------------|------|---------|------|
-| 400 | INVALID_REQUEST | 요청값이 올바르지 않습니다. | 요청 DTO 검증 실패 |
+| 400 | INVALID_REQUEST | 요청값이 올바르지 않습니다. | 요청 DTO 검증 실패, 요청 본문 누락/형식 오류, 필수 파라미터 누락, 파라미터 타입 오류 |
 | 401 | INVALID_LOGIN | 이메일 또는 비밀번호가 올바르지 않습니다. | 로그인 인증 실패 |
 | 401 | INVALID_TOKEN | 인증 토큰이 유효하지 않습니다. | 인증 토큰 없음, 만료, 형식 오류, 서명 검증 실패 |
+| 404 | NOT_FOUND | 요청한 리소스를 찾을 수 없습니다. | 존재하지 않는 API 경로 또는 리소스 |
 | 404 | USER_NOT_FOUND | 사용자를 찾을 수 없습니다. | 인증된 사용자 식별자에 해당하는 회원 없음 |
+| 405 | METHOD_NOT_ALLOWED | 지원하지 않는 HTTP 메서드입니다. | API가 지원하지 않는 HTTP Method 요청 |
 | 409 | DUPLICATED_EMAIL | 이미 사용 중인 이메일입니다. | 회원가입 이메일 중복 |
 | 500 | INTERNAL_SERVER_ERROR | 서버 내부 오류가 발생했습니다. | 예상하지 못한 서버 오류 |
 
@@ -124,6 +126,12 @@ INVALID_LOGIN
 
 INVALID_TOKEN
 → 로그인 만료 또는 재로그인 안내 표시
+
+METHOD_NOT_ALLOWED
+→ 요청 Method 확인
+
+NOT_FOUND
+→ 요청 URL 확인
 
 INTERNAL_SERVER_ERROR
 → 일반 서버 오류 안내 표시
@@ -172,6 +180,49 @@ Controller 파라미터의 @Valid 검증 실패
 → Spring MVC가 MethodArgumentNotValidException 발생
 → GlobalExceptionHandler가 필드별 오류 추출
 → INVALID_REQUEST + fieldErrors 응답
+```
+
+### 요청 본문/파라미터 오류
+
+```text
+JSON body 누락 또는 읽기 실패
+→ HttpMessageNotReadableException 발생
+→ INVALID_REQUEST 응답
+```
+
+```text
+필수 쿼리 파라미터 누락
+→ MissingServletRequestParameterException 발생
+→ INVALID_REQUEST + fieldErrors 응답
+```
+
+```text
+쿼리 파라미터 또는 경로 변수 타입 변환 실패
+→ MethodArgumentTypeMismatchException 발생
+→ INVALID_REQUEST + fieldErrors 응답
+```
+
+### 지원하지 않는 HTTP Method
+
+```text
+POST API에 GET 요청 등 지원하지 않는 Method 요청
+→ HttpRequestMethodNotSupportedException 발생
+→ METHOD_NOT_ALLOWED 응답
+```
+
+예:
+
+```text
+GET /api/v1/auth/signup
+→ METHOD_NOT_ALLOWED
+```
+
+### 존재하지 않는 경로
+
+```text
+존재하지 않는 API 경로 요청
+→ NoHandlerFoundException 또는 NoResourceFoundException 발생
+→ NOT_FOUND 응답
 ```
 
 ### 예상하지 못한 서버 예외

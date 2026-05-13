@@ -14,6 +14,16 @@ public enum ErrorCode {
     INVALID_REQUEST(HttpStatus.BAD_REQUEST, "INVALID_REQUEST", "요청값이 올바르지 않습니다."),
 
     /**
+     * 요청한 HTTP Method를 지원하지 않는 경우.
+     */
+    METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "METHOD_NOT_ALLOWED", "지원하지 않는 HTTP 메서드입니다."),
+
+    /**
+     * 요청한 API 경로 또는 리소스를 찾을 수 없는 경우.
+     */
+    NOT_FOUND(HttpStatus.NOT_FOUND, "NOT_FOUND", "요청한 리소스를 찾을 수 없습니다."),
+
+    /**
      * 회원가입 시 이미 사용 중인 이메일로 가입을 시도한 경우.
      */
     DUPLICATED_EMAIL(HttpStatus.CONFLICT, "DUPLICATED_EMAIL", "이미 사용 중인 이메일입니다."),
