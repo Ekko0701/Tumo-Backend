@@ -222,6 +222,35 @@ Refresh Token으로 새 Access Token과 새 Refresh Token을 발급한다.
 - DB에 저장된 Refresh Token과 요청 Refresh Token이 일치해야 한다.
 - 재발급 성공 시 기존 Refresh Token을 새 Refresh Token으로 교체한다.
 
+---
+
+### 1.4 로그아웃
+
+```http
+POST /api/v1/auth/logout
+```
+
+현재 로그인한 사용자의 Refresh Token을 폐기한다.
+
+#### Request Header
+
+```http
+Authorization: Bearer {accessToken}
+```
+
+#### Response
+
+```http
+204 No Content
+```
+
+#### 정책
+
+- 로그아웃 성공 시 서버에 저장된 Refresh Token을 삭제한다.
+- 기존 Access Token은 만료 시간까지 유효할 수 있다.
+- 로그아웃 이후 Refresh Token을 통한 Access Token 재발급은 실패한다.
+- Access Token 즉시 무효화는 추후 Redis blacklist 방식으로 확장할 수 있다.
+
 ## 2. 시세 API
 
 ### 2.1 종목 목록 조회
@@ -462,6 +491,7 @@ Authorization: Bearer {accessToken}
 | POST | `/api/v1/auth/signup` | N | 회원가입 |
 | POST | `/api/v1/auth/login` | N | 로그인 |
 | POST | `/api/v1/auth/token/refresh` | N | Access Token 재발급 |
+| POST | `/api/v1/auth/logout` | Y | 로그아웃 |
 | GET | `/api/v1/stocks` | Y | 종목 목록 조회 |
 | GET | `/api/v1/stocks/{stockCode}` | Y | 종목 상세 조회 |
 | POST | `/api/v1/orders` | Y | 매수 주문 |

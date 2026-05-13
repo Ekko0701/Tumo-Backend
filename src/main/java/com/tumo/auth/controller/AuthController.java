@@ -9,6 +9,7 @@ import com.tumo.auth.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,5 +37,13 @@ public class AuthController {
     @PostMapping("/token/refresh")
     public LoginResponse refreshToken(@Valid @RequestBody TokenRefreshRequest request) {
         return authService.refreshToken(request);
+    }
+
+    @PostMapping("/logout")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void logout(Authentication authentication) {
+        Long userId = (Long) authentication.getPrincipal();
+
+        authService.logout(userId);
     }
 }

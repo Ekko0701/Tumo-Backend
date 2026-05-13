@@ -101,6 +101,14 @@ public class AuthService {
         return new LoginResponse(newAccessToken, newRefreshToken, TOKEN_TYPE);
     }
 
+    @Transactional
+    public void logout(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        refreshTokenRepository.deleteByUser(user);
+    }
+
     private LocalDateTime calculateRefreshTokenExpiresAt() {
         return LocalDateTime.now()
                 .plus(Duration.ofMillis(jwtProperties.refreshTokenExpirationMillis()));

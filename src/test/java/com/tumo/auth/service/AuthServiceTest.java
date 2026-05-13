@@ -167,4 +167,27 @@ class AuthServiceTest {
                         assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.INVALID_TOKEN)
                 );
     }
+
+    @Test
+    void logoutDeletesRefreshToken() {
+        User user = new User("test@example.com", "encoded-password", "tester");
+        ReflectionTestUtils.setField(user, "id", 1L);
+        given(userRepository.findById(1L)).willReturn(Optional.of(user));
+
+        authService.logout(1L);
+
+        verify(refreshTokenRepository).deleteByUser(user);
+    }
+
+    @Test
+    void logoutThrowsExceptionWhenUserDoesNotExist() {
+        given(userRepository.findById(1L)).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> authService.logout(1L))
+                .isInstanceOfSatisfying(BusinessException.class, exception ->
+                        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.USER_NOT_FOUND)
+                );
+
+        verify(refreshTokenRepository, never()).deleteByUser(any(User.class));
+    }
 }

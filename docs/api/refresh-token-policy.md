@@ -38,6 +38,16 @@ Access Token 만료 후 재발급 흐름:
 5. Refresh Token rotation 적용 시 새 Refresh Token도 함께 발급
 ```
 
+로그아웃 흐름:
+
+```text
+1. 클라이언트가 Access Token으로 로그아웃 요청
+2. 서버가 Access Token 검증
+3. Access Token의 userId로 사용자 식별
+4. 사용자에게 저장된 Refresh Token 삭제
+5. 이후 기존 Refresh Token으로 재발급 요청 시 실패
+```
+
 ## 만료 시간
 
 개발용 초기 설정:
@@ -193,7 +203,7 @@ REFRESH_TOKEN_NOT_FOUND
 ## 구현 예정
 
 ```text
-로그아웃 시 Refresh Token 폐기
+Access Token 즉시 무효화 정책
 ```
 
 ## 구현 완료
@@ -206,4 +216,5 @@ JwtTokenProvider에 createRefreshToken 추가
 RefreshToken Entity/Repository 추가
 로그인 시 Refresh Token 저장 및 응답
 토큰 재발급 API 추가
+로그아웃 시 Refresh Token 폐기
 ```
