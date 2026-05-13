@@ -277,12 +277,16 @@ Authorization: Bearer {accessToken}
     {
       "stockCode": "005930",
       "stockName": "삼성전자",
-      "market": "KOSPI"
+      "market": "KOSPI",
+      "currentPrice": 75000,
+      "priceChangedAt": "2026-05-13T15:30:00"
     },
     {
       "stockCode": "000660",
       "stockName": "SK하이닉스",
-      "market": "KOSPI"
+      "market": "KOSPI",
+      "currentPrice": 180000,
+      "priceChangedAt": "2026-05-13T15:30:00"
     }
   ]
 }
@@ -296,6 +300,8 @@ Authorization: Bearer {accessToken}
 | stocks[].stockCode | String | 종목 코드 |
 | stocks[].stockName | String | 종목명 |
 | stocks[].market | String | 시장 구분 |
+| stocks[].currentPrice | Number | 현재가 |
+| stocks[].priceChangedAt | String | 현재가 기준 시각 |
 
 ---
 
@@ -345,6 +351,7 @@ Authorization: Bearer {accessToken}
 
 - Phase 1에서는 KIS Open API의 REST 현재가 조회를 사용한다.
 - KIS Open API 연동에 문제가 있으면 mock 시세 데이터를 사용할 수 있다.
+- 초기 구현에서는 개발용 seed 종목 데이터를 사용한다.
 
 ## 3. 거래 API
 

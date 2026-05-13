@@ -44,6 +44,11 @@ public enum ErrorCode {
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER_NOT_FOUND", "사용자를 찾을 수 없습니다."),
 
     /**
+     * 요청한 종목 코드에 해당하는 종목을 찾을 수 없는 경우.
+     */
+    STOCK_NOT_FOUND(HttpStatus.NOT_FOUND, "STOCK_NOT_FOUND", "종목을 찾을 수 없습니다."),
+
+    /**
      * 서버 내부에서 예상하지 못한 오류가 발생한 경우.
      */
     INTERNAL_SERVER_ERROR(

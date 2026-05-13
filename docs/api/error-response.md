@@ -106,6 +106,7 @@ ErrorResponse.of(ErrorCode.INVALID_REQUEST, fieldErrors)
 | 401 | INVALID_TOKEN | 인증 토큰이 유효하지 않습니다. | 인증 토큰 없음, 만료, 형식 오류, 서명 검증 실패 |
 | 404 | NOT_FOUND | 요청한 리소스를 찾을 수 없습니다. | 존재하지 않는 API 경로 또는 리소스 |
 | 404 | USER_NOT_FOUND | 사용자를 찾을 수 없습니다. | 인증된 사용자 식별자에 해당하는 회원 없음 |
+| 404 | STOCK_NOT_FOUND | 종목을 찾을 수 없습니다. | 요청한 종목 코드에 해당하는 종목 없음 |
 | 405 | METHOD_NOT_ALLOWED | 지원하지 않는 HTTP 메서드입니다. | API가 지원하지 않는 HTTP Method 요청 |
 | 409 | DUPLICATED_EMAIL | 이미 사용 중인 이메일입니다. | 회원가입 이메일 중복 |
 | 500 | INTERNAL_SERVER_ERROR | 서버 내부 오류가 발생했습니다. | 예상하지 못한 서버 오류 |
@@ -132,6 +133,9 @@ METHOD_NOT_ALLOWED
 
 NOT_FOUND
 → 요청 URL 확인
+
+STOCK_NOT_FOUND
+→ 종목 코드 확인
 
 INTERNAL_SERVER_ERROR
 → 일반 서버 오류 안내 표시
