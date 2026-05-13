@@ -389,6 +389,10 @@ Authorization: Bearer {accessToken}
 
 #### Response
 
+```http
+HTTP/1.1 201 Created
+```
+
 ```json
 {
   "orderId": 1,
