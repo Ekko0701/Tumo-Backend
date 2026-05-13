@@ -29,6 +29,11 @@ public enum ErrorCode {
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "INVALID_TOKEN", "인증 토큰이 유효하지 않습니다."),
 
     /**
+     * 인증된 사용자 식별자에 해당하는 회원을 찾을 수 없는 경우.
+     */
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER_NOT_FOUND", "사용자를 찾을 수 없습니다."),
+
+    /**
      * 서버 내부에서 예상하지 못한 오류가 발생한 경우.
      */
     INTERNAL_SERVER_ERROR(
