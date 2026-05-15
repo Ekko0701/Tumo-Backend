@@ -7,8 +7,10 @@
 ```text
 docs/
 ├── api/
+│   ├── auth-test-guide.md
 │   ├── error-response.md
 │   ├── jwt-authentication.md
+│   ├── phase1-test-guide.md
 │   ├── refresh-token-policy.md
 │   └── phase1.md
 ├── db/
@@ -31,6 +33,8 @@ docs/
 ## Phase 1 문서
 
 - [API 명세](api/phase1.md)
+- [Phase 1 API 테스트 가이드](api/phase1-test-guide.md)
+- [Auth API 테스트 가이드](api/auth-test-guide.md)
 - [에러 응답 형식](api/error-response.md)
 - [JWT 인증](api/jwt-authentication.md)
 - [Refresh Token 정책](api/refresh-token-policy.md)
