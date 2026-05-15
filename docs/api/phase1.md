@@ -447,6 +447,10 @@ Authorization: Bearer {accessToken}
 
 #### Response
 
+```http
+HTTP/1.1 200 OK
+```
+
 ```json
 {
   "cashBalance": 9250000,
@@ -494,6 +498,7 @@ Authorization: Bearer {accessToken}
 - 종목별 평가손익은 `(현재가 - 평균 매입가) * 보유 수량`으로 계산한다.
 - 종목별 수익률은 `(현재가 - 평균 매입가) / 평균 매입가 * 100`으로 계산한다.
 - 전체 수익률은 Phase 1에서는 초기 시드머니 10,000,000원 대비 수익률로 계산한다.
+- 보유 종목이 없으면 `holdings`는 빈 배열로 응답한다.
 
 ## Phase 1 엔드포인트 요약
 
