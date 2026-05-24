@@ -18,7 +18,8 @@ docs/
 ├── setup/
 │   └── application-yaml.md
 └── decisions/
-    └── README.md
+    ├── README.md
+    └── realtime-stock-price-plan.md
 ```
 
 ## 문서 역할
@@ -40,3 +41,4 @@ docs/
 - [Refresh Token 정책](api/refresh-token-policy.md)
 - [DB 스키마](db/phase1-schema.md)
 - [application.yaml 설정](setup/application-yaml.md)
+- [실시간 주식 시세 연동 작업 계획](decisions/realtime-stock-price-plan.md)
