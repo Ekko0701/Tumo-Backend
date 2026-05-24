@@ -133,6 +133,33 @@ stockRealtimePriceClient.subscribe(stockCodes, new StockPriceEventHandler() {
 
 위 세 코드는 모두 같은 의미다. 가격 이벤트가 들어오면 `stockRealtimePriceService.handle(event)`를 실행한다.
 
+특히 다음 코드는 Java의 메서드 참조 문법이다.
+
+```java
+stockRealtimePriceService::handle
+```
+
+이 코드는 `StockPriceEvent`가 들어오면 `stockRealtimePriceService` 객체의 `handle(...)` 메서드에 이벤트를 전달해 실행하겠다는 뜻이다.
+
+```java
+event -> stockRealtimePriceService.handle(event)
+```
+
+실제로 adapter 내부에서는 전달받은 handler를 다음처럼 호출한다.
+
+```java
+StockPriceEvent event = parse(rawMessage);
+handler.handle(event);
+```
+
+이때 handler가 `stockRealtimePriceService::handle`로 전달되어 있었다면, 위 코드는 결과적으로 다음 코드와 같다.
+
+```java
+stockRealtimePriceService.handle(event);
+```
+
+즉 `stockRealtimePriceService::handle`은 메서드를 즉시 실행하는 코드가 아니라, 나중에 이벤트가 도착했을 때 실행할 메서드를 callback으로 넘기는 코드다.
+
 `KisRealtimePriceClient`는 `StockRealtimePriceClient`의 KIS adapter 구현체가 된다. adapter는 KIS WebSocket 연결, 인증, 구독 메시지 전송, 원본 메시지 수신, 파싱, `StockPriceEvent` 생성을 담당한다. 하지만 `Stock` 엔티티 조회, DB 저장, 주문 체결, 포트폴리오 평가는 담당하지 않는다.
 
 adapter가 application service를 직접 의존하지 않고 handler만 호출하는 이유는 KIS 구현체와 use case 처리를 느슨하게 연결하기 위해서다.
