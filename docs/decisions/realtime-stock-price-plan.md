@@ -87,6 +87,145 @@ KIS raw message
 
 `StockPriceEvent`나 `StockPrice`가 직접 `Stock`을 변경하지 않는다. 이벤트와 값 객체는 상태와 사실을 표현하고, 실제 use case 흐름은 `StockRealtimePriceService`가 담당한다. 이렇게 해야 KIS가 아닌 다른 provider가 추가되어도 주문, 포트폴리오, 종목 도메인으로 외부 API 세부사항이 새지 않는다.
 
+### Handler와 Adapter 흐름
+
+`StockPriceEventHandler`는 실시간 가격 이벤트가 들어왔을 때 실행할 callback interface다.
+
+```java
+@FunctionalInterface
+public interface StockPriceEventHandler {
+
+    void handle(StockPriceEvent event);
+}
+```
+
+`StockRealtimePriceClient`는 handler를 파라미터로 받는다.
+
+```java
+void subscribe(Collection<String> stockCodes, StockPriceEventHandler handler);
+```
+
+이 구조의 의미는 다음과 같다.
+
+```text
+이 종목들을 구독한다.
+그리고 가격 이벤트가 들어올 때마다 전달받은 handler를 호출한다.
+```
+
+Java 문법상 handler는 다음 세 가지 방식으로 전달할 수 있다.
+
+```java
+stockRealtimePriceClient.subscribe(stockCodes, event -> stockRealtimePriceService.handle(event));
+```
+
+```java
+stockRealtimePriceClient.subscribe(stockCodes, stockRealtimePriceService::handle);
+```
+
+```java
+stockRealtimePriceClient.subscribe(stockCodes, new StockPriceEventHandler() {
+    @Override
+    public void handle(StockPriceEvent event) {
+        stockRealtimePriceService.handle(event);
+    }
+});
+```
+
+위 세 코드는 모두 같은 의미다. 가격 이벤트가 들어오면 `stockRealtimePriceService.handle(event)`를 실행한다.
+
+`KisRealtimePriceClient`는 `StockRealtimePriceClient`의 KIS adapter 구현체가 된다. adapter는 KIS WebSocket 연결, 인증, 구독 메시지 전송, 원본 메시지 수신, 파싱, `StockPriceEvent` 생성을 담당한다. 하지만 `Stock` 엔티티 조회, DB 저장, 주문 체결, 포트폴리오 평가는 담당하지 않는다.
+
+adapter가 application service를 직접 의존하지 않고 handler만 호출하는 이유는 KIS 구현체와 use case 처리를 느슨하게 연결하기 위해서다.
+
+```text
+StockRealtimePriceService
+→ stockRealtimePriceClient.subscribe(stockCodes, this::handle)
+→ KisRealtimePriceClient가 KIS 메시지 수신
+→ KisRealtimePriceClient가 StockPriceEvent 생성
+→ KisRealtimePriceClient가 handler.handle(event) 호출
+→ 결과적으로 StockRealtimePriceService.handle(event) 실행
+```
+
+### 책임 분리 상세
+
+실시간 시세 처리에서 각 계층의 책임은 다음과 같다.
+
+| 대상 | 해야 하는 일 | 하지 말아야 할 일 |
+|------|--------------|-------------------|
+| `KisRealtimePriceClient` | KIS 연결, 인증, 구독, 메시지 수신, 파싱, `StockPriceEvent` 생성, handler 호출 | `Stock` 조회, DB 저장, 주문 체결, 포트폴리오 평가, iOS 응답 정책 결정 |
+| `StockRealtimePriceService` | `Stock` 조회, `Stock.updatePrice(...)` 호출, 마지막 가격 캐시 저장, `StockPricePublisher.publish(event)` 호출 | 주문 체결, 포트폴리오 평가, SSE/WebSocket 응답 DTO 결정 |
+| `OrderService` | 사용자 주문 요청 처리, 주문 직전 최신 가격 확정, 잔고 검증, 주문/보유/잔고 갱신 | 실시간 WebSocket 구독, iOS stream 발행 |
+| `PortfolioService` | 사용자 보유 종목 기준 평가금액 계산 | 실시간 이벤트 수신, 주문 체결 |
+| `StockPricePublisher` 구현체 | 처리된 가격 이벤트를 SSE 또는 WebSocket 구독자에게 전달 | KIS 메시지 파싱, `Stock` 가격 변경, 주문/포트폴리오 계산 |
+
+따라서 `StockRealtimePriceService.handle(event)`는 실시간 가격 이벤트로 인해 즉시 필요한 최소 작업만 수행한다.
+
+```text
+Stock 조회
+→ Stock.updatePrice(...)
+→ DB 마지막 가격 캐시 갱신
+→ StockPricePublisher.publish(event)
+```
+
+주문과 포트폴리오는 이 handler 내부에서 실행하지 않는다. 주문은 사용자의 주문 요청 시 `OrderService`가 처리하고, 포트폴리오는 사용자의 포트폴리오 조회 시 `PortfolioService`가 처리한다.
+
+### 세부 플로우
+
+실시간 시세 반영 플로우:
+
+```text
+KIS WebSocket
+→ KisRealtimePriceClient
+→ KisWebSocketMessageParser
+→ StockPrice
+→ StockPriceEvent
+→ StockPriceEventHandler.handle(event)
+→ StockRealtimePriceService.handle(event)
+→ StockRepository.findByStockCode(...)
+→ Stock.updatePrice(...)
+→ StockRepository.save(...)
+→ StockPricePublisher.publish(event)
+→ SSE 또는 WebSocket adapter
+→ iOS 주식 리스트 가격 갱신
+```
+
+주문 가격 확정 플로우:
+
+```text
+iOS 주문 요청
+→ OrderController
+→ OrderService.buy(...)
+→ User 조회
+→ Stock 조회
+→ StockPriceQueryPort.findCurrentPrice(stockCode)
+→ 최신 가격 확정
+→ Stock.updatePrice(...)
+→ 잔고 검증
+→ Order 저장
+→ Holding 생성 또는 갱신
+→ User cashBalance 변경
+→ 주문 응답 반환
+```
+
+포트폴리오 평가 플로우:
+
+```text
+iOS 포트폴리오 조회 요청
+→ PortfolioController
+→ PortfolioService
+→ 사용자 Holding 목록 조회
+→ 각 보유 종목의 최신 가격 확인
+→ 평가금액, 평가손익, 수익률 계산
+→ 포트폴리오 응답 반환
+```
+
+핵심 원칙은 다음과 같다.
+
+```text
+실시간 이벤트는 가격 캐시를 최신화한다.
+주문과 포트폴리오는 최신 가격을 필요할 때 사용한다.
+```
+
 ## Backend 패키지 계획
 
 초기 구현은 `stock` bounded context 내부에 둔다.
