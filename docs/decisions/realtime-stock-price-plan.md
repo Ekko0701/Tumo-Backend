@@ -173,6 +173,51 @@ StockRealtimePriceService
 → 결과적으로 StockRealtimePriceService.handle(event) 실행
 ```
 
+### 구독 요청과 이벤트 생성 시점
+
+`StockPriceSubscriptionService`는 DB에 저장된 모든 종목 코드를 조회해 `StockRealtimePriceClient`에 구독을 요청한다.
+
+```java
+List<String> stockCodes = stockRepository.findAll().stream()
+        .map(Stock::getStockCode)
+        .toList();
+
+stockRealtimePriceClient.subscribe(stockCodes, stockRealtimePriceService::handle);
+```
+
+이때 첫 번째 인자인 `stockCodes`는 KIS WebSocket에 어떤 종목들을 구독할지 알려주는 값이다. 두 번째 인자인 `stockRealtimePriceService::handle`은 KIS에서 가격 이벤트가 도착했을 때 실행할 callback이다.
+
+중요한 점은 `subscribe(...)` 호출 시점에 `StockPriceEvent`를 바로 만드는 것이 아니라는 점이다. `subscribe(...)`는 구독 요청만 수행한다. 이후 KIS WebSocket에서 실제 실시간 메시지가 도착할 때마다 `KisRealtimePriceClient`가 메시지를 파싱해 `StockPriceEvent`를 하나씩 생성한다.
+
+```text
+StockPriceSubscriptionService
+→ stockCodes = ["005930", "000660"]
+→ stockRealtimePriceClient.subscribe(stockCodes, stockRealtimePriceService::handle)
+→ KisRealtimePriceClient가 "005930" 구독 요청
+→ KisRealtimePriceClient가 "000660" 구독 요청
+```
+
+이후 메시지 수신 흐름:
+
+```text
+KIS 메시지: 09:00:01 / 005930 / 현재가 75100
+→ KisRealtimePriceClient가 StockPriceEvent(005930, 75100) 생성
+→ handler.handle(event)
+→ StockRealtimePriceService.handle(event)
+
+KIS 메시지: 09:00:02 / 000660 / 현재가 180500
+→ KisRealtimePriceClient가 StockPriceEvent(000660, 180500) 생성
+→ handler.handle(event)
+→ StockRealtimePriceService.handle(event)
+
+KIS 메시지: 09:00:03 / 005930 / 현재가 75200
+→ KisRealtimePriceClient가 StockPriceEvent(005930, 75200) 생성
+→ handler.handle(event)
+→ StockRealtimePriceService.handle(event)
+```
+
+따라서 `stockCodes`는 구독 대상을 결정하는 입력이고, `handler`는 나중에 생성되는 각 `StockPriceEvent`를 처리할 실행 경로다.
+
 ### 책임 분리 상세
 
 실시간 시세 처리에서 각 계층의 책임은 다음과 같다.
