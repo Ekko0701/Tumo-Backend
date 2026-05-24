@@ -15,6 +15,8 @@ docs/
 │   └── phase1.md
 ├── db/
 │   └── phase1-schema.md
+├── rules/
+│   └── backend-coding-rules.md
 ├── setup/
 │   └── application-yaml.md
 └── decisions/
@@ -28,6 +30,7 @@ docs/
 |------|------|
 | `api/` | iOS 클라이언트와 백엔드가 공유하는 API 계약 |
 | `db/` | 테이블, 컬럼, 제약조건, 계산 정책 |
+| `rules/` | 백엔드 코드 작성, 에러 처리, 주석 작성 규칙 |
 | `setup/` | 로컬 개발 환경과 설정 파일 설명 |
 | `decisions/` | 주요 기술/정책 결정 기록 |
 
@@ -40,5 +43,6 @@ docs/
 - [JWT 인증](api/jwt-authentication.md)
 - [Refresh Token 정책](api/refresh-token-policy.md)
 - [DB 스키마](db/phase1-schema.md)
+- [Backend Coding Rules](rules/backend-coding-rules.md)
 - [application.yaml 설정](setup/application-yaml.md)
 - [실시간 주식 시세 연동 작업 계획](decisions/realtime-stock-price-plan.md)
