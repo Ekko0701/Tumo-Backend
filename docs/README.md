@@ -18,7 +18,8 @@ docs/
 ├── rules/
 │   └── backend-coding-rules.md
 ├── setup/
-│   └── application-yaml.md
+│   ├── application-yaml.md
+│   └── kis-realtime-websocket-guide.md
 └── decisions/
     ├── README.md
     └── realtime-stock-price-plan.md
@@ -45,4 +46,5 @@ docs/
 - [DB 스키마](db/phase1-schema.md)
 - [Backend Coding Rules](rules/backend-coding-rules.md)
 - [application.yaml 설정](setup/application-yaml.md)
+- [KIS 실시간 시세 WebSocket 연동 가이드](setup/kis-realtime-websocket-guide.md)
 - [실시간 주식 시세 연동 작업 계획](decisions/realtime-stock-price-plan.md)
