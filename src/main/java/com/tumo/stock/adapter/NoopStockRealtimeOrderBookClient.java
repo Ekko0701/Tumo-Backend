@@ -4,6 +4,7 @@ import com.tumo.stock.port.StockOrderBookEventHandler;
 import com.tumo.stock.port.StockRealtimeOrderBookClient;
 import java.util.Collection;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 /**
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
+@ConditionalOnProperty(prefix = "kis", name = "enabled", havingValue = "false", matchIfMissing = true)
 public class NoopStockRealtimeOrderBookClient implements StockRealtimeOrderBookClient {
 
     /**
