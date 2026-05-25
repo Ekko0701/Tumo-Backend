@@ -1,6 +1,6 @@
 package com.tumo.stock.port;
 
-import com.tumo.stock.domain.StockPriceEvent;
+import com.tumo.stock.domain.price.StockPriceEvent;
 
 /**
  * 처리된 가격 이벤트를 Backend 외부 구독자에게 전달하는 outbound port.

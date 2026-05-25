@@ -1,4 +1,4 @@
-package com.tumo.stock.domain;
+package com.tumo.stock.domain.stock;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

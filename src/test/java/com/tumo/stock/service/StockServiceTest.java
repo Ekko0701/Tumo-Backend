@@ -6,8 +6,8 @@ import static org.mockito.BDDMockito.given;
 
 import com.tumo.global.error.BusinessException;
 import com.tumo.global.error.ErrorCode;
-import com.tumo.stock.domain.Market;
-import com.tumo.stock.domain.Stock;
+import com.tumo.stock.domain.stock.Market;
+import com.tumo.stock.domain.stock.Stock;
 import com.tumo.stock.dto.StockListResponse;
 import com.tumo.stock.dto.StockResponse;
 import com.tumo.stock.repository.StockRepository;

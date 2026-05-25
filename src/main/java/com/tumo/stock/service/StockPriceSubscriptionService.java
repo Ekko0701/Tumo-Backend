@@ -1,6 +1,6 @@
 package com.tumo.stock.service;
 
-import com.tumo.stock.domain.Stock;
+import com.tumo.stock.domain.stock.Stock;
 import com.tumo.stock.port.StockRealtimePriceClient;
 import com.tumo.stock.repository.StockRepository;
 import java.util.List;

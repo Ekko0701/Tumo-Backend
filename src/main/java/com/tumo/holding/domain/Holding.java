@@ -1,6 +1,6 @@
 package com.tumo.holding.domain;
 
-import com.tumo.stock.domain.Stock;
+import com.tumo.stock.domain.stock.Stock;
 import com.tumo.user.domain.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

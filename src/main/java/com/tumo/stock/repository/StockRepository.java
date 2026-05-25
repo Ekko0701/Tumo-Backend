@@ -1,6 +1,6 @@
 package com.tumo.stock.repository;
 
-import com.tumo.stock.domain.Stock;
+import com.tumo.stock.domain.stock.Stock;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 

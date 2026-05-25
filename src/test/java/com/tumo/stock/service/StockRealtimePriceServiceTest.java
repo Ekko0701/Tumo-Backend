@@ -8,10 +8,10 @@ import static org.mockito.Mockito.verify;
 
 import com.tumo.global.error.BusinessException;
 import com.tumo.global.error.ErrorCode;
-import com.tumo.stock.domain.Market;
-import com.tumo.stock.domain.Stock;
-import com.tumo.stock.domain.StockPrice;
-import com.tumo.stock.domain.StockPriceEvent;
+import com.tumo.stock.domain.stock.Market;
+import com.tumo.stock.domain.stock.Stock;
+import com.tumo.stock.domain.price.StockPrice;
+import com.tumo.stock.domain.price.StockPriceEvent;
 import com.tumo.stock.port.StockPricePublisher;
 import com.tumo.stock.repository.StockRepository;
 import java.math.BigDecimal;

@@ -1,6 +1,6 @@
 package com.tumo.stock.dto;
 
-import com.tumo.stock.domain.Stock;
+import com.tumo.stock.domain.stock.Stock;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 

@@ -8,7 +8,7 @@ import com.tumo.order.domain.Order;
 import com.tumo.order.dto.OrderRequest;
 import com.tumo.order.dto.OrderResponse;
 import com.tumo.order.repository.OrderRepository;
-import com.tumo.stock.domain.Stock;
+import com.tumo.stock.domain.stock.Stock;
 import com.tumo.stock.repository.StockRepository;
 import com.tumo.user.domain.User;
 import com.tumo.user.repository.UserRepository;

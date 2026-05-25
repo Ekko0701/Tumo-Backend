@@ -1,6 +1,6 @@
 package com.tumo.stock.port;
 
-import com.tumo.stock.domain.StockPriceEvent;
+import com.tumo.stock.domain.price.StockPriceEvent;
 
 /**
  * 실시간 가격 이벤트를 처리하는 callback interface.

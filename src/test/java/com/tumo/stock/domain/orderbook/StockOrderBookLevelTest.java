@@ -1,4 +1,4 @@
-package com.tumo.stock.domain;
+package com.tumo.stock.domain.orderbook;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

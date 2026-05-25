@@ -2,8 +2,8 @@ package com.tumo.holding.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.tumo.stock.domain.Market;
-import com.tumo.stock.domain.Stock;
+import com.tumo.stock.domain.stock.Market;
+import com.tumo.stock.domain.stock.Stock;
 import com.tumo.user.domain.User;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.Test;

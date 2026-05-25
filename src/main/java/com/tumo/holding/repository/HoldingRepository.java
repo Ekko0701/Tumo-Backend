@@ -1,7 +1,7 @@
 package com.tumo.holding.repository;
 
 import com.tumo.holding.domain.Holding;
-import com.tumo.stock.domain.Stock;
+import com.tumo.stock.domain.stock.Stock;
 import com.tumo.user.domain.User;
 import java.util.List;
 import java.util.Optional;

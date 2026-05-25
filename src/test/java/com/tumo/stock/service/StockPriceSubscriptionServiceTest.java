@@ -6,8 +6,8 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
-import com.tumo.stock.domain.Market;
-import com.tumo.stock.domain.Stock;
+import com.tumo.stock.domain.stock.Market;
+import com.tumo.stock.domain.stock.Stock;
 import com.tumo.stock.port.StockPriceEventHandler;
 import com.tumo.stock.port.StockRealtimePriceClient;
 import com.tumo.stock.repository.StockRepository;

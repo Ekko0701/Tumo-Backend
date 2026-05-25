@@ -1,6 +1,6 @@
 package com.tumo.stock.port;
 
-import com.tumo.stock.domain.StockPrice;
+import com.tumo.stock.domain.price.StockPrice;
 import java.util.Optional;
 
 /**

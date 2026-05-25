@@ -1,4 +1,4 @@
-package com.tumo.stock.domain;
+package com.tumo.stock.domain.price;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

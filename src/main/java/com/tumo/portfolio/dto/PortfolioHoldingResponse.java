@@ -1,7 +1,7 @@
 package com.tumo.portfolio.dto;
 
 import com.tumo.holding.domain.Holding;
-import com.tumo.stock.domain.Stock;
+import com.tumo.stock.domain.stock.Stock;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "포트폴리오 보유 종목 응답")

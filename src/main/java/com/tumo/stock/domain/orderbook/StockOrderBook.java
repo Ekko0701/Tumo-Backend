@@ -1,4 +1,4 @@
-package com.tumo.stock.domain;
+package com.tumo.stock.domain.orderbook;
 
 import java.time.LocalDateTime;
 import java.util.List;

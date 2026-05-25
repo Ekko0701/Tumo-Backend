@@ -1,6 +1,6 @@
 package com.tumo.stock.adapter;
 
-import com.tumo.stock.domain.StockPriceEvent;
+import com.tumo.stock.domain.price.StockPriceEvent;
 import com.tumo.stock.port.StockPricePublisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
