@@ -1,4 +1,4 @@
-package com.tumo.stock.adapter.out.kis;
+package com.tumo.stock.adapter.out.kis.auth;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

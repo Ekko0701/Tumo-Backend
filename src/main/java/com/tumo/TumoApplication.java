@@ -1,7 +1,7 @@
 package com.tumo;
 
 import com.tumo.global.security.jwt.JwtProperties;
-import com.tumo.stock.adapter.out.kis.KisProperties;
+import com.tumo.stock.adapter.out.kis.config.KisProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

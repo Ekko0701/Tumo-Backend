@@ -1,5 +1,6 @@
-package com.tumo.stock.adapter.out.kis;
+package com.tumo.stock.adapter.out.kis.auth;
 
+import com.tumo.stock.adapter.out.kis.config.KisProperties;
 import org.springframework.web.client.RestClient;
 
 /**

@@ -1,4 +1,4 @@
-package com.tumo.stock.adapter.out.kis;
+package com.tumo.stock.adapter.out.kis.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

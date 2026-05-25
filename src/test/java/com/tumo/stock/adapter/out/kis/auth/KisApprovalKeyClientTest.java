@@ -1,4 +1,4 @@
-package com.tumo.stock.adapter.out.kis;
+package com.tumo.stock.adapter.out.kis.auth;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -12,6 +12,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestClient;
+import com.tumo.stock.adapter.out.kis.config.KisProperties;
 
 class KisApprovalKeyClientTest {
 

@@ -1,5 +1,6 @@
-package com.tumo.stock.adapter.out.kis;
+package com.tumo.stock.adapter.out.kis.config;
 
+import com.tumo.stock.adapter.out.kis.auth.KisApprovalKeyClient;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

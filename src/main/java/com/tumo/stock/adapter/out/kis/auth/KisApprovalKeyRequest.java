@@ -1,6 +1,7 @@
-package com.tumo.stock.adapter.out.kis;
+package com.tumo.stock.adapter.out.kis.auth;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.tumo.stock.adapter.out.kis.config.KisProperties;
 
 /**
  * KIS WebSocket approval key 발급 요청 값.
