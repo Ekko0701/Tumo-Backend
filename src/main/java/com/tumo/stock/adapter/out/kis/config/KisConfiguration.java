@@ -3,7 +3,10 @@ package com.tumo.stock.adapter.out.kis.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tumo.stock.adapter.out.kis.auth.KisApprovalKeyClient;
 import com.tumo.stock.adapter.out.kis.websocket.client.KisRealtimeWebSocketClient;
+import com.tumo.stock.adapter.out.kis.websocket.dispatcher.KisWebSocketMessageDispatcher;
 import com.tumo.stock.adapter.out.kis.websocket.message.KisWebSocketMessageSender;
+import com.tumo.stock.adapter.out.kis.websocket.parser.KisOrderBookMessageParser;
+import com.tumo.stock.adapter.out.kis.websocket.parser.KisTradePriceMessageParser;
 import com.tumo.stock.adapter.out.kis.websocket.session.KisWebSocketSessionManager;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -54,6 +57,48 @@ public class KisConfiguration {
     @ConditionalOnProperty(prefix = "kis", name = "enabled", havingValue = "true")
     KisWebSocketMessageSender kisWebSocketMessageSender(ObjectMapper objectMapper) {
         return new KisWebSocketMessageSender(objectMapper);
+    }
+
+    /**
+     * KIS 실시간체결가 메시지 parser bean을 생성한다.
+     *
+     * @param properties KIS Open API 연동 설정 값
+     * @return KIS 실시간체결가 메시지 parser
+     */
+    @Bean
+    @ConditionalOnProperty(prefix = "kis", name = "enabled", havingValue = "true")
+    KisTradePriceMessageParser kisTradePriceMessageParser(KisProperties properties) {
+        return new KisTradePriceMessageParser(properties.tradePriceTrId());
+    }
+
+    /**
+     * KIS 실시간호가 메시지 parser bean을 생성한다.
+     *
+     * @param properties KIS Open API 연동 설정 값
+     * @return KIS 실시간호가 메시지 parser
+     */
+    @Bean
+    @ConditionalOnProperty(prefix = "kis", name = "enabled", havingValue = "true")
+    KisOrderBookMessageParser kisOrderBookMessageParser(KisProperties properties) {
+        return new KisOrderBookMessageParser(properties.orderBookTrId());
+    }
+
+    /**
+     * KIS WebSocket 메시지 dispatcher bean을 생성한다.
+     *
+     * @param properties KIS Open API 연동 설정 값
+     * @param tradePriceMessageParser KIS 실시간체결가 메시지 parser
+     * @param orderBookMessageParser KIS 실시간호가 메시지 parser
+     * @return KIS WebSocket 메시지 dispatcher
+     */
+    @Bean
+    @ConditionalOnProperty(prefix = "kis", name = "enabled", havingValue = "true")
+    KisWebSocketMessageDispatcher kisWebSocketMessageDispatcher(
+            KisProperties properties,
+            KisTradePriceMessageParser tradePriceMessageParser,
+            KisOrderBookMessageParser orderBookMessageParser
+    ) {
+        return new KisWebSocketMessageDispatcher(properties, tradePriceMessageParser, orderBookMessageParser);
     }
 
     /**
