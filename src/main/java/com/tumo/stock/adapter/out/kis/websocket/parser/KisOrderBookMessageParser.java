@@ -1,4 +1,4 @@
-package com.tumo.stock.adapter.out.kis.websocket;
+package com.tumo.stock.adapter.out.kis.websocket.parser;
 
 import com.tumo.stock.domain.orderbook.StockOrderBook;
 import com.tumo.stock.domain.orderbook.StockOrderBookEvent;

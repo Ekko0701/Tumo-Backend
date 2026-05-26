@@ -1,4 +1,4 @@
-package com.tumo.stock.adapter.out.kis.websocket;
+package com.tumo.stock.adapter.out.kis.websocket.message;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

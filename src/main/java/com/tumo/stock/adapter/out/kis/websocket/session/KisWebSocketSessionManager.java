@@ -1,4 +1,4 @@
-package com.tumo.stock.adapter.out.kis.websocket;
+package com.tumo.stock.adapter.out.kis.websocket.session;
 
 import com.tumo.stock.adapter.out.kis.config.KisProperties;
 import java.net.URI;

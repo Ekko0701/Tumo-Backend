@@ -1,4 +1,4 @@
-package com.tumo.stock.adapter.out.kis.websocket;
+package com.tumo.stock.adapter.out.kis.websocket.message;
 
 import java.util.Objects;
 
