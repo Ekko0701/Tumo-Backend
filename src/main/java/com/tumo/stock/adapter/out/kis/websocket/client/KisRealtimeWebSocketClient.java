@@ -2,6 +2,7 @@ package com.tumo.stock.adapter.out.kis.websocket.client;
 
 import com.tumo.stock.adapter.out.kis.auth.KisApprovalKeyClient;
 import com.tumo.stock.adapter.out.kis.config.KisProperties;
+import com.tumo.stock.adapter.out.kis.websocket.dispatcher.KisWebSocketMessageDispatcher;
 import com.tumo.stock.adapter.out.kis.websocket.message.KisWebSocketMessageSender;
 import com.tumo.stock.adapter.out.kis.websocket.message.KisWebSocketSubscribeMessage;
 import com.tumo.stock.adapter.out.kis.websocket.session.KisWebSocketSessionManager;
@@ -40,6 +41,11 @@ public class KisRealtimeWebSocketClient implements StockRealtimePriceClient, Sto
     private final KisWebSocketMessageSender messageSender;
 
     /**
+     * KIS WebSocket 수신 메시지를 체결가/호가 이벤트 처리 흐름으로 분배하는 dispatcher.
+     */
+    private final KisWebSocketMessageDispatcher messageDispatcher;
+
+    /**
      * KIS 체결가 메시지를 수신했을 때 호출할 handler.
      */
     private volatile StockPriceEventHandler priceEventHandler;
@@ -56,17 +62,20 @@ public class KisRealtimeWebSocketClient implements StockRealtimePriceClient, Sto
      * @param properties KIS Open API 연동 설정 값
      * @param sessionManager KIS WebSocket 연결 manager
      * @param messageSender KIS WebSocket 메시지 sender
+     * @param messageDispatcher KIS WebSocket 수신 메시지 dispatcher
      */
     public KisRealtimeWebSocketClient(
             KisApprovalKeyClient approvalKeyClient,
             KisProperties properties,
             KisWebSocketSessionManager sessionManager,
-            KisWebSocketMessageSender messageSender
+            KisWebSocketMessageSender messageSender,
+            KisWebSocketMessageDispatcher messageDispatcher
     ) {
         this.approvalKeyClient = Objects.requireNonNull(approvalKeyClient, "KIS approval key client는 필수입니다.");
         this.properties = Objects.requireNonNull(properties, "KIS 설정 값은 필수입니다.");
         this.sessionManager = Objects.requireNonNull(sessionManager, "KIS WebSocket session manager는 필수입니다.");
         this.messageSender = Objects.requireNonNull(messageSender, "KIS WebSocket message sender는 필수입니다.");
+        this.messageDispatcher = Objects.requireNonNull(messageDispatcher, "KIS WebSocket message dispatcher는 필수입니다.");
     }
 
     /**
@@ -85,7 +94,7 @@ public class KisRealtimeWebSocketClient implements StockRealtimePriceClient, Sto
         }
 
         String approvalKey = approvalKeyClient.issueApprovalKey();
-        WebSocket webSocket = sessionManager.connect();
+        WebSocket webSocket = sessionManager.connect(this::handleRawMessage);
 
         normalizedStockCodes.stream()
                 .map(stockCode -> KisWebSocketSubscribeMessage.subscribeTradePrice(approvalKey, properties, stockCode))
@@ -108,7 +117,7 @@ public class KisRealtimeWebSocketClient implements StockRealtimePriceClient, Sto
         }
 
         String approvalKey = approvalKeyClient.issueApprovalKey();
-        WebSocket webSocket = sessionManager.connect();
+        WebSocket webSocket = sessionManager.connect(this::handleRawMessage);
 
         normalizedStockCodes.stream()
                 .map(stockCode -> KisWebSocketSubscribeMessage.subscribeOrderBook(approvalKey, properties, stockCode))
@@ -129,12 +138,21 @@ public class KisRealtimeWebSocketClient implements StockRealtimePriceClient, Sto
         }
 
         String approvalKey = approvalKeyClient.issueApprovalKey();
-        WebSocket webSocket = sessionManager.connect();
+        WebSocket webSocket = sessionManager.connect(this::handleRawMessage);
 
         normalizedStockCodes.forEach(stockCode -> {
             messageSender.send(webSocket, KisWebSocketSubscribeMessage.unsubscribeTradePrice(approvalKey, properties, stockCode));
             messageSender.send(webSocket, KisWebSocketSubscribeMessage.unsubscribeOrderBook(approvalKey, properties, stockCode));
         });
+    }
+
+    /**
+     * KIS WebSocket에서 수신한 raw message를 dispatcher에 전달한다.
+     *
+     * @param rawMessage KIS WebSocket에서 수신한 원본 메시지
+     */
+    void handleRawMessage(String rawMessage) {
+        messageDispatcher.dispatch(rawMessage, priceEventHandler, orderBookEventHandler);
     }
 
     private List<String> normalizeStockCodes(Collection<String> stockCodes) {

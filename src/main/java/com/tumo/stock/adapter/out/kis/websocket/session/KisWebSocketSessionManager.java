@@ -7,6 +7,7 @@ import java.net.http.WebSocket;
 import java.util.Objects;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
+import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -29,6 +30,12 @@ public class KisWebSocketSessionManager {
      * 현재 사용 중인 KIS WebSocket 연결.
      */
     private volatile WebSocket webSocket;
+
+    /**
+     * KIS WebSocket에서 수신한 raw message를 처리하는 callback.
+     */
+    private volatile Consumer<String> messageHandler = message -> {
+    };
 
     /**
      * KIS WebSocket 세션 manager를 생성한다.
@@ -56,6 +63,18 @@ public class KisWebSocketSessionManager {
      * @return KIS WebSocket 연결
      */
     public synchronized WebSocket connect() {
+        return connect(messageHandler);
+    }
+
+    /**
+     * KIS WebSocket 연결을 생성하거나 기존 연결을 반환하고 수신 메시지 callback을 등록한다.
+     *
+     * @param messageHandler KIS WebSocket에서 수신한 raw message를 처리하는 callback
+     * @return KIS WebSocket 연결
+     */
+    public synchronized WebSocket connect(Consumer<String> messageHandler) {
+        this.messageHandler = Objects.requireNonNull(messageHandler, "KIS WebSocket message handler는 필수입니다.");
+
         if (webSocket != null) {
             return webSocket;
         }
@@ -85,7 +104,12 @@ public class KisWebSocketSessionManager {
         return URI.create(websocketUrl + websocketPath);
     }
 
-    private static class KISWebSocketListener implements WebSocket.Listener {
+    private class KISWebSocketListener implements WebSocket.Listener {
+
+        /**
+         * WebSocket text frame이 분할되어 들어올 때 메시지를 합치기 위한 buffer.
+         */
+        private final StringBuilder textBuffer = new StringBuilder();
 
         @Override
         public void onOpen(WebSocket webSocket) {
@@ -96,8 +120,32 @@ public class KisWebSocketSessionManager {
         @Override
         public CompletionStage<?> onText(WebSocket webSocket, CharSequence data, boolean last) {
             log.debug("KIS WebSocket 메시지를 수신했습니다.");
+            handleText(data, last);
             webSocket.request(1);
             return WebSocket.Listener.super.onText(webSocket, data, last);
+        }
+
+        /**
+         * 수신한 text frame을 완성된 raw message로 만든 뒤 callback에 전달한다.
+         *
+         * @param data 수신한 text frame
+         * @param last 현재 frame이 메시지의 마지막 frame인지 여부
+         */
+        private void handleText(CharSequence data, boolean last) {
+            textBuffer.append(data);
+
+            if (!last) {
+                return;
+            }
+
+            String rawMessage = textBuffer.toString();
+            textBuffer.setLength(0);
+
+            try {
+                messageHandler.accept(rawMessage);
+            } catch (RuntimeException exception) {
+                log.warn("KIS WebSocket 수신 메시지 callback 처리에 실패했습니다.", exception);
+            }
         }
     }
 }

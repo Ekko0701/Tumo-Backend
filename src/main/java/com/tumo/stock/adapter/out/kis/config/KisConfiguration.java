@@ -108,6 +108,7 @@ public class KisConfiguration {
      * @param properties KIS Open API 연동 설정 값
      * @param sessionManager KIS WebSocket 연결 manager
      * @param messageSender KIS WebSocket 메시지 sender
+     * @param messageDispatcher KIS WebSocket 수신 메시지 dispatcher
      * @return KIS WebSocket 기반 실시간 시세 client
      */
     @Bean
@@ -116,8 +117,15 @@ public class KisConfiguration {
             KisApprovalKeyClient approvalKeyClient,
             KisProperties properties,
             KisWebSocketSessionManager sessionManager,
-            KisWebSocketMessageSender messageSender
+            KisWebSocketMessageSender messageSender,
+            KisWebSocketMessageDispatcher messageDispatcher
     ) {
-        return new KisRealtimeWebSocketClient(approvalKeyClient, properties, sessionManager, messageSender);
+        return new KisRealtimeWebSocketClient(
+                approvalKeyClient,
+                properties,
+                sessionManager,
+                messageSender,
+                messageDispatcher
+        );
     }
 }
