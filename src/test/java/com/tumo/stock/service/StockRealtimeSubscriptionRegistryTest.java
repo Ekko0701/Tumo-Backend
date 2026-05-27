@@ -37,6 +37,24 @@ class StockRealtimeSubscriptionRegistryTest {
     }
 
     @Test
+    void getSubscribedPriceStockCodesReturnsSortedStockCodes() {
+        registry.registerNewPriceSubscriptions(List.of("005930", "000660"));
+
+        List<String> result = registry.getSubscribedPriceStockCodes();
+
+        assertThat(result).containsExactly("000660", "005930");
+    }
+
+    @Test
+    void getSubscribedOrderBookStockCodesReturnsSortedStockCodes() {
+        registry.registerNewOrderBookSubscriptions(List.of("005930", "000660"));
+
+        List<String> result = registry.getSubscribedOrderBookStockCodes();
+
+        assertThat(result).containsExactly("000660", "005930");
+    }
+
+    @Test
     void unregisterPriceSubscriptionsRemovesSubscribedStockCodes() {
         registry.registerNewPriceSubscriptions(List.of("005930"));
         registry.unregisterPriceSubscriptions(List.of("005930"));

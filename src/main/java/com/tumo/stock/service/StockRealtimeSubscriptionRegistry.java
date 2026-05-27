@@ -43,6 +43,28 @@ public class StockRealtimeSubscriptionRegistry {
     }
 
     /**
+     * 실시간 체결가를 구독 중인 종목 코드 목록을 조회한다.
+     *
+     * @return 실시간 체결가를 구독 중인 종목 코드 목록
+     */
+    public List<String> getSubscribedPriceStockCodes() {
+        return subscribedPriceStockCodes.stream()
+                .sorted()
+                .toList();
+    }
+
+    /**
+     * 실시간 호가를 구독 중인 종목 코드 목록을 조회한다.
+     *
+     * @return 실시간 호가를 구독 중인 종목 코드 목록
+     */
+    public List<String> getSubscribedOrderBookStockCodes() {
+        return subscribedOrderBookStockCodes.stream()
+                .sorted()
+                .toList();
+    }
+
+    /**
      * 실시간 체결가 구독 상태에서 종목 코드를 제거한다.
      *
      * @param stockCodes 구독 해제한 종목 코드 목록

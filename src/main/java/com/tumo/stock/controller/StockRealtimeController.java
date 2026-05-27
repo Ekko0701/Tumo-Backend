@@ -1,11 +1,14 @@
 package com.tumo.stock.controller;
 
+import com.tumo.stock.dto.StockRealtimeSubscriptionResponse;
 import com.tumo.stock.service.StockOrderBookSubscriptionService;
 import com.tumo.stock.service.StockPriceSubscriptionService;
+import com.tumo.stock.service.StockRealtimeSubscriptionQueryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -19,6 +22,13 @@ public class StockRealtimeController {
 
     private final StockPriceSubscriptionService stockPriceSubscriptionService;
     private final StockOrderBookSubscriptionService stockOrderBookSubscriptionService;
+    private final StockRealtimeSubscriptionQueryService stockRealtimeSubscriptionQueryService;
+
+    @GetMapping("/subscriptions")
+    @Operation(summary = "실시간 시세 구독 상태 조회", description = "현재 Backend가 구독 중인 KIS 실시간 체결가/호가 종목 목록을 조회합니다.")
+    public StockRealtimeSubscriptionResponse getSubscriptions() {
+        return stockRealtimeSubscriptionQueryService.getSubscriptions();
+    }
 
     @PostMapping("/subscribe")
     @ResponseStatus(HttpStatus.NO_CONTENT)
