@@ -22,6 +22,12 @@ public class StockPriceSseEmitterRegistry {
 
     private static final String STOCK_PRICE_EVENT_NAME = "stock-price";
 
+    private static final String HEARTBEAT_EVENT_NAME = "heartbeat";
+
+    private static final String HEARTBEAT_DATA = "ok";
+
+    private static final long SSE_TIMEOUT_MILLIS = 30 * 60 * 1000L;
+
     /**
      * 실시간 가격 이벤트를 수신할 SSE 구독 목록.
      */
@@ -63,22 +69,43 @@ public class StockPriceSseEmitterRegistry {
         Objects.requireNonNull(event, "가격 이벤트는 필수입니다.");
         subscriptions.stream()
                 .filter(subscription -> subscription.matches(event.price().stockCode()))
-                .forEach(subscription -> send(subscription, event));
+                .forEach(subscription -> sendPriceEvent(subscription, event));
+    }
+
+    /**
+     * 연결된 모든 SSE 구독자에게 heartbeat 이벤트를 전송한다.
+     */
+    public void sendHeartbeat() {
+        subscriptions.forEach(this::sendHeartbeatEvent);
     }
 
     protected SseEmitter createEmitter() {
-        return new SseEmitter(0L);
+        return new SseEmitter(SSE_TIMEOUT_MILLIS);
     }
 
-    private void send(StockPriceSseSubscription subscription, StockPriceEvent event) {
+    private void sendPriceEvent(StockPriceSseSubscription subscription, StockPriceEvent event) {
         try {
             subscription.emitter().send(SseEmitter.event()
                     .name(STOCK_PRICE_EVENT_NAME)
                     .data(event));
         } catch (IOException | IllegalStateException exception) {
-            subscriptions.remove(subscription);
-            log.debug("실시간 가격 SSE 이벤트 전송에 실패해 연결을 제거했습니다.", exception);
+            remove(subscription, "실시간 가격 SSE 이벤트 전송에 실패해 연결을 제거했습니다.", exception);
         }
+    }
+
+    private void sendHeartbeatEvent(StockPriceSseSubscription subscription) {
+        try {
+            subscription.emitter().send(SseEmitter.event()
+                    .name(HEARTBEAT_EVENT_NAME)
+                    .data(HEARTBEAT_DATA));
+        } catch (IOException | IllegalStateException exception) {
+            remove(subscription, "실시간 가격 SSE heartbeat 전송에 실패해 연결을 제거했습니다.", exception);
+        }
+    }
+
+    private void remove(StockPriceSseSubscription subscription, String message, Exception exception) {
+        subscriptions.remove(subscription);
+        log.debug(message, exception);
     }
 
     private Set<String> normalizeStockCodes(Collection<String> stockCodes) {

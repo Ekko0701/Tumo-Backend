@@ -32,6 +32,23 @@ class StockOrderBookSseEmitterRegistryTest {
         assertThat(skHynixEmitter.sendCount).isZero();
     }
 
+    @Test
+    void sendHeartbeatSendsEventToAllSubscribers() {
+        RecordingSseEmitter samsungEmitter = new RecordingSseEmitter();
+        RecordingSseEmitter skHynixEmitter = new RecordingSseEmitter();
+        TestStockOrderBookSseEmitterRegistry registry = new TestStockOrderBookSseEmitterRegistry(
+                samsungEmitter,
+                skHynixEmitter
+        );
+        registry.connect("005930");
+        registry.connect("000660");
+
+        registry.sendHeartbeat();
+
+        assertThat(samsungEmitter.sendCount).isEqualTo(1);
+        assertThat(skHynixEmitter.sendCount).isEqualTo(1);
+    }
+
     private StockOrderBookEvent event(String stockCode) {
         StockOrderBook orderBook = new StockOrderBook(
                 stockCode,

@@ -36,6 +36,23 @@ class StockPriceSseEmitterRegistryTest {
         assertThat(skHynixEmitter.sendCount).isZero();
     }
 
+    @Test
+    void sendHeartbeatSendsEventToAllSubscribers() {
+        RecordingSseEmitter allStockEmitter = new RecordingSseEmitter();
+        RecordingSseEmitter samsungEmitter = new RecordingSseEmitter();
+        TestStockPriceSseEmitterRegistry registry = new TestStockPriceSseEmitterRegistry(
+                allStockEmitter,
+                samsungEmitter
+        );
+        registry.connect();
+        registry.connect(List.of("005930"));
+
+        registry.sendHeartbeat();
+
+        assertThat(allStockEmitter.sendCount).isEqualTo(1);
+        assertThat(samsungEmitter.sendCount).isEqualTo(1);
+    }
+
     private StockPriceEvent event(String stockCode) {
         StockPrice price = new StockPrice(
                 stockCode,
