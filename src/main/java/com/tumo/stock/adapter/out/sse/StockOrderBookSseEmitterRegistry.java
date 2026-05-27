@@ -19,21 +19,25 @@ public class StockOrderBookSseEmitterRegistry {
     private static final String STOCK_ORDER_BOOK_EVENT_NAME = "stock-order-book";
 
     /**
-     * 실시간 호가 이벤트를 수신할 SSE 연결 목록.
+     * 실시간 호가 이벤트를 수신할 SSE 구독 목록.
      */
-    private final List<SseEmitter> emitters = new CopyOnWriteArrayList<>();
+    private final List<StockOrderBookSseSubscription> subscriptions = new CopyOnWriteArrayList<>();
 
     /**
-     * 실시간 호가 이벤트를 수신할 SSE 연결을 등록한다.
+     * 특정 종목의 실시간 호가 이벤트를 수신할 SSE 연결을 등록한다.
      *
+     * @param stockCode 실시간 호가 이벤트를 수신할 종목 코드
      * @return 등록된 SSE 연결
      */
-    public SseEmitter connect() {
-        SseEmitter emitter = new SseEmitter(0L);
-        emitters.add(emitter);
-        emitter.onCompletion(() -> emitters.remove(emitter));
-        emitter.onTimeout(() -> emitters.remove(emitter));
-        emitter.onError(error -> emitters.remove(emitter));
+    public SseEmitter connect(String stockCode) {
+        String normalizedStockCode = normalizeStockCode(stockCode);
+        SseEmitter emitter = createEmitter();
+        StockOrderBookSseSubscription subscription = new StockOrderBookSseSubscription(emitter, normalizedStockCode);
+
+        subscriptions.add(subscription);
+        emitter.onCompletion(() -> subscriptions.remove(subscription));
+        emitter.onTimeout(() -> subscriptions.remove(subscription));
+        emitter.onError(error -> subscriptions.remove(subscription));
         return emitter;
     }
 
@@ -44,17 +48,46 @@ public class StockOrderBookSseEmitterRegistry {
      */
     public void publish(StockOrderBookEvent event) {
         Objects.requireNonNull(event, "호가 이벤트는 필수입니다.");
-        emitters.forEach(emitter -> send(emitter, event));
+        subscriptions.stream()
+                .filter(subscription -> subscription.matches(event.orderBook().stockCode()))
+                .forEach(subscription -> send(subscription, event));
     }
 
-    private void send(SseEmitter emitter, StockOrderBookEvent event) {
+    protected SseEmitter createEmitter() {
+        return new SseEmitter(0L);
+    }
+
+    private void send(StockOrderBookSseSubscription subscription, StockOrderBookEvent event) {
         try {
-            emitter.send(SseEmitter.event()
+            subscription.emitter().send(SseEmitter.event()
                     .name(STOCK_ORDER_BOOK_EVENT_NAME)
                     .data(event));
         } catch (IOException | IllegalStateException exception) {
-            emitters.remove(emitter);
+            subscriptions.remove(subscription);
             log.debug("실시간 호가 SSE 이벤트 전송에 실패해 연결을 제거했습니다.", exception);
+        }
+    }
+
+    private String normalizeStockCode(String stockCode) {
+        if (stockCode == null || stockCode.isBlank()) {
+            throw new IllegalArgumentException("호가 stream을 구독할 종목 코드는 필수입니다.");
+        }
+        return stockCode.trim();
+    }
+
+    /**
+     * 실시간 호가 SSE 연결과 관심 종목 코드.
+     *
+     * @param emitter 실시간 호가 이벤트를 전송할 SSE 연결
+     * @param stockCode 이 연결이 수신할 종목 코드
+     */
+    private record StockOrderBookSseSubscription(
+            SseEmitter emitter,
+            String stockCode
+    ) {
+
+        private boolean matches(String eventStockCode) {
+            return stockCode.equals(eventStockCode);
         }
     }
 }
