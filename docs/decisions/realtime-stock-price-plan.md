@@ -41,10 +41,10 @@
 
 ```text
 KIS WebSocket
-→ KisRealtimeStockPriceClient
+→ KisRealtimeWebSocketClient
 → StockRealtimePriceService
 → StockPricePublisher
-→ StockPriceStreamController
+→ StockRealtimeStreamController
 → iOS Stock List
 ```
 
@@ -318,10 +318,10 @@ com.tumo.stock
 │   └── StockPricePublisher
 ├── adapter
 │   ├── in
-│   │   └── StockPriceStreamController
+│   │   └── StockRealtimeStreamController
 │   └── out
 │       └── kis
-│           ├── KisRealtimeStockPriceClient
+│           ├── KisRealtimeWebSocketClient
 │           ├── KisStockPriceQueryClient
 │           ├── KisWebSocketMessageParser
 │           ├── KisAccessTokenClient
@@ -352,7 +352,7 @@ GET /api/v1/stocks
 iOS 클라이언트로 실시간 가격을 전달하는 endpoint를 추가한다.
 
 ```http
-GET /api/v1/stocks/prices/stream
+GET /api/v1/stocks/realtime/prices/stream
 ```
 
 초기 방식은 Server-Sent Events를 우선 검토한다.
@@ -482,7 +482,7 @@ feat: add stock price realtime ports
 
 ### 3단계: KIS WebSocket adapter 구현
 
-- `KisRealtimeStockPriceClient`를 구현한다.
+- `KisRealtimeWebSocketClient`를 구현한다.
 - KIS WebSocket 연결, 인증, 종목 구독, message 수신을 담당한다.
 - `KisWebSocketMessageParser`로 raw message 파싱을 분리한다.
 - reconnect 정책을 구현한다.
@@ -509,8 +509,9 @@ feat: add stock price realtime ports
 
 ### 5단계: iOS 구독용 stream API 구현
 
-- `StockPriceStreamController`를 추가한다.
-- `GET /api/v1/stocks/prices/stream` endpoint를 제공한다.
+- `StockRealtimeStreamController`를 추가한다.
+- `GET /api/v1/stocks/realtime/prices/stream` endpoint를 제공한다.
+- `GET /api/v1/stocks/{stockCode}/realtime/order-book/stream` endpoint를 제공한다.
 - JWT 인증을 유지한다.
 - client disconnect 시 구독 resource를 정리한다.
 - heartbeat event를 추가해 유휴 연결을 유지한다.

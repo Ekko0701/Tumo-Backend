@@ -1,201 +1,94 @@
-# Backend application.yaml 설정 설명
+# application.yaml 설정
 
-이 문서는 `src/main/resources/application.yaml`의 초기 설정값을 설명한다.
+이 문서는 `src/main/resources/application.yaml`의 현재 설정 값을 설명한다.
 
-## 전체 설정 예시
+## 전체 구조
 
 ```yaml
 spring:
   application:
-    name: Tumo
-
   datasource:
-    url: jdbc:postgresql://localhost:5432/tumo
-    username: tumo
-    password: tumo
-
   jpa:
-    hibernate:
-      ddl-auto: update
-    properties:
-      hibernate:
-        format_sql: true
-    show-sql: true
 
 server:
-  port: 8080
 
 jwt:
-  secret: tumo-local-development-secret-key-must-be-at-least-32-bytes
-  access-token-expiration-millis: 3600000
-  refresh-token-expiration-millis: 1209600000
+
+kis:
 ```
 
-## spring
+## `spring.application`
+
+Spring Boot 애플리케이션 이름을 설정한다.
 
 ```yaml
 spring:
-```
-
-Spring Boot 관련 설정의 최상위 그룹이다.
-
-`application`, `datasource`, `jpa`처럼 Spring Boot가 사용하는 설정들이 이 아래에 위치한다.
-
-## spring.application
-
-```yaml
   application:
     name: Tumo
 ```
 
-현재 Spring Boot 애플리케이션의 이름을 지정한다.
+## `spring.datasource`
 
-이 이름은 로그, 모니터링, Actuator, 클라우드 환경 등에서 애플리케이션을 식별하는 데 사용될 수 있다.
-
-## spring.datasource
+로컬 PostgreSQL 연결 정보를 설정한다.
 
 ```yaml
+spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/tumo
     username: tumo
     password: tumo
 ```
 
-데이터베이스 연결 정보를 지정한다.
+주의:
 
-### url
+- 현재 값은 로컬 개발용이다.
+- 운영 환경에서는 DB 접속 정보와 비밀번호를 환경변수 또는 secret 관리 도구로 분리해야 한다.
 
-```yaml
-    url: jdbc:postgresql://localhost:5432/tumo
-```
+## `spring.jpa`
 
-PostgreSQL 접속 주소다.
-
-구성은 다음과 같다.
-
-```text
-jdbc:postgresql://  PostgreSQL JDBC 드라이버 사용
-localhost           내 컴퓨터에서 실행 중인 DB 서버
-5432                PostgreSQL 기본 포트
-tumo                접속할 데이터베이스 이름
-```
-
-즉, 로컬 PostgreSQL 서버의 `tumo` 데이터베이스에 접속한다는 의미다.
-
-### username
+JPA와 Hibernate 동작을 설정한다.
 
 ```yaml
-    username: tumo
-```
-
-데이터베이스 접속 계정 이름이다.
-
-### password
-
-```yaml
-    password: tumo
-```
-
-데이터베이스 접속 비밀번호다.
-
-개발 환경에서는 직접 적어도 되지만, 배포 환경에서는 환경변수나 별도 secret 관리 방식으로 분리하는 것이 좋다.
-
-## spring.jpa
-
-```yaml
+spring:
   jpa:
-```
-
-JPA 관련 설정이다.
-
-JPA는 Java 객체와 데이터베이스 테이블을 매핑해주는 기술이다. 예를 들어 `User` 엔티티를 만들면 데이터베이스의 사용자 테이블과 연결할 수 있다.
-
-## spring.jpa.hibernate
-
-```yaml
     hibernate:
       ddl-auto: update
-```
-
-Hibernate는 Spring Data JPA에서 주로 사용하는 JPA 구현체다.
-
-### ddl-auto
-
-```yaml
-      ddl-auto: update
-```
-
-애플리케이션 실행 시 Entity 클래스를 기준으로 데이터베이스 스키마를 자동으로 갱신한다.
-
-`update`는 다음 의미를 가진다.
-
-```text
-Entity에는 있지만 DB에는 없는 테이블이나 컬럼이 있으면 추가한다.
-기존 데이터는 가능한 유지한다.
-```
-
-개발 초반에는 편리하지만, 운영 환경에서는 의도하지 않은 스키마 변경 위험이 있으므로 보통 `validate` 또는 Flyway/Liquibase 같은 마이그레이션 도구를 사용한다.
-
-## spring.jpa.properties.hibernate
-
-```yaml
     properties:
       hibernate:
         format_sql: true
-```
-
-Hibernate에 전달할 세부 옵션을 지정한다.
-
-### format_sql
-
-```yaml
-        format_sql: true
-```
-
-Hibernate가 출력하는 SQL을 보기 좋게 줄바꿈하고 들여쓰기한다.
-
-개발 중 SQL을 읽고 디버깅할 때 유용하다.
-
-## spring.jpa.show-sql
-
-```yaml
     show-sql: true
+    open-in-view: false
 ```
 
-JPA/Hibernate가 실행하는 SQL을 콘솔에 출력한다.
+설정 의미:
 
-개발 중에는 실제로 어떤 SQL이 실행되는지 확인하기 좋지만, 운영 환경에서는 로그가 많아지고 민감 정보가 노출될 수 있어 보통 끈다.
+| 설정 | 의미 |
+|------|------|
+| `ddl-auto: update` | Entity 기준으로 DB 스키마를 자동 갱신한다. 개발 초기에만 적합하다. |
+| `format_sql: true` | Hibernate SQL 로그를 읽기 좋게 포맷한다. |
+| `show-sql: true` | 실행 SQL을 콘솔에 출력한다. |
+| `open-in-view: false` | Web 요청이 끝날 때까지 영속성 컨텍스트를 열어두지 않는다. |
 
-## server
+운영 환경에서는 `ddl-auto: update` 대신 `validate`와 마이그레이션 도구 사용을 검토한다.
+
+## `server`
+
+Spring Boot 내장 서버 포트를 설정한다.
 
 ```yaml
 server:
   port: 8080
 ```
 
-Spring Boot 내장 웹 서버 설정이다.
-
-### port
-
-```yaml
-  port: 8080
-```
-
-애플리케이션이 사용할 포트를 지정한다.
-
-이 설정에서는 서버 실행 후 다음 주소로 접근할 수 있다.
+로컬 Base URL:
 
 ```text
 http://localhost:8080
 ```
 
-예를 들어 `/health` API를 만들면 다음 주소로 확인한다.
+## `jwt`
 
-```text
-http://localhost:8080/health
-```
-
-## jwt
+JWT Access Token과 Refresh Token 발급/검증에 사용하는 값을 설정한다.
 
 ```yaml
 jwt:
@@ -204,53 +97,62 @@ jwt:
   refresh-token-expiration-millis: 1209600000
 ```
 
-JWT 발급과 검증에 사용하는 설정이다.
+| 설정 | 의미 |
+|------|------|
+| `secret` | JWT signature 생성과 검증에 사용하는 secret |
+| `access-token-expiration-millis` | Access Token 만료 시간 |
+| `refresh-token-expiration-millis` | Refresh Token 만료 시간 |
 
-### secret
+주의:
 
-```yaml
-  secret: tumo-local-development-secret-key-must-be-at-least-32-bytes
-```
+- `secret`은 개발용 값이다.
+- 운영 환경에서는 반드시 환경변수 또는 secret 관리 도구로 분리한다.
 
-JWT signature 생성과 검증에 사용하는 개발용 비밀값이다.
+## `kis`
 
-운영 환경에서는 환경변수 또는 Secret Manager로 분리하는 것이 좋다.
-
-### access-token-expiration-millis
-
-```yaml
-  access-token-expiration-millis: 3600000
-```
-
-Access Token 만료 시간이다.
-
-```text
-3600000ms = 1시간
-```
-
-### refresh-token-expiration-millis
+한국투자증권 KIS Open API 연동 설정이다.
 
 ```yaml
-  refresh-token-expiration-millis: 1209600000
+kis:
+  enabled: false
+  app-key: ${KIS_APP_KEY:}
+  app-secret: ${KIS_APP_SECRET:}
+  rest-url: ${KIS_REST_URL:https://openapi.koreainvestment.com:9443}
+  websocket-url: ${KIS_WEBSOCKET_URL:ws://ops.koreainvestment.com:21000}
+  websocket-path: ${KIS_WEBSOCKET_PATH:/tryitout}
+  customer-type: ${KIS_CUSTOMER_TYPE:P}
+  trade-price-tr-id: ${KIS_TRADE_PRICE_TR_ID:H0STCNT0}
+  order-book-tr-id: ${KIS_ORDER_BOOK_TR_ID:H0STASP0}
 ```
 
-Refresh Token 만료 시간이다.
+| 설정 | 의미 |
+|------|------|
+| `enabled` | KIS adapter 활성화 여부 |
+| `app-key` | KIS Developers에서 발급받은 app key |
+| `app-secret` | KIS Developers에서 발급받은 app secret |
+| `rest-url` | KIS REST API 기본 URL |
+| `websocket-url` | KIS WebSocket 기본 URL |
+| `websocket-path` | KIS WebSocket 접속 경로 |
+| `customer-type` | KIS 고객 타입 |
+| `trade-price-tr-id` | 국내주식 실시간체결가 TR ID |
+| `order-book-tr-id` | 국내주식 실시간호가 TR ID |
+
+기본값 `kis.enabled=false`에서는 KIS adapter가 활성화되지 않는다.
+
+실제 KIS 연동을 실행하려면 환경변수로 값을 주입한다.
 
 ```text
-1209600000ms = 14일
+KIS_APP_KEY
+KIS_APP_SECRET
+KIS_REST_URL
+KIS_WEBSOCKET_URL
+KIS_WEBSOCKET_PATH
+KIS_CUSTOMER_TYPE
+KIS_TRADE_PRICE_TR_ID
+KIS_ORDER_BOOK_TR_ID
 ```
 
-## 요약
+주의:
 
-이 설정은 다음 의미를 가진다.
-
-```text
-애플리케이션 이름은 Tumo다.
-localhost:5432에서 실행 중인 PostgreSQL의 tumo DB에 접속한다.
-DB 계정은 tumo / tumo를 사용한다.
-개발 중에는 JPA Entity 기준으로 DB 스키마를 자동 갱신한다.
-실행되는 SQL을 콘솔에 출력하고 보기 좋게 포맷한다.
-서버는 8080 포트에서 실행한다.
-JWT Access Token은 1시간 동안 유효하다.
-JWT Refresh Token은 14일 동안 유효하다.
-```
+- App Key, App Secret, approval key는 로그에 남기지 않는다.
+- KIS 실전/모의 URL은 실제 계정 환경과 KIS 공식 문서를 기준으로 확인한다.
