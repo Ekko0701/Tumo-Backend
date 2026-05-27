@@ -31,6 +31,9 @@ class StockOrderBookSubscriptionServiceTest {
     @Mock
     private StockOrderBookService stockOrderBookService;
 
+    @Mock
+    private StockRealtimeSubscriptionRegistry stockRealtimeSubscriptionRegistry;
+
     @InjectMocks
     private StockOrderBookSubscriptionService stockOrderBookSubscriptionService;
 
@@ -40,11 +43,47 @@ class StockOrderBookSubscriptionServiceTest {
         Stock samsung = new Stock("005930", "삼성전자", Market.KOSPI, 75000L, priceChangedAt);
         Stock skHynix = new Stock("000660", "SK하이닉스", Market.KOSPI, 180000L, priceChangedAt);
         given(stockRepository.findAll()).willReturn(List.of(samsung, skHynix));
+        given(stockRealtimeSubscriptionRegistry.registerNewOrderBookSubscriptions(List.of("005930", "000660")))
+                .willReturn(List.of("005930", "000660"));
 
         stockOrderBookSubscriptionService.subscribeAllStocks();
 
         verify(stockRealtimeOrderBookClient).subscribe(
                 eq(List.of("005930", "000660")),
+                any(StockOrderBookEventHandler.class)
+        );
+    }
+
+    @Test
+    void subscribeAllStocksSubscribesOnlyNewStockCodes() {
+        LocalDateTime priceChangedAt = LocalDateTime.of(2026, 5, 25, 9, 0);
+        Stock samsung = new Stock("005930", "삼성전자", Market.KOSPI, 75000L, priceChangedAt);
+        Stock skHynix = new Stock("000660", "SK하이닉스", Market.KOSPI, 180000L, priceChangedAt);
+        Stock naver = new Stock("035420", "NAVER", Market.KOSPI, 190000L, priceChangedAt);
+        given(stockRepository.findAll()).willReturn(List.of(samsung, skHynix, naver));
+        given(stockRealtimeSubscriptionRegistry.registerNewOrderBookSubscriptions(List.of("005930", "000660", "035420")))
+                .willReturn(List.of("035420"));
+
+        stockOrderBookSubscriptionService.subscribeAllStocks();
+
+        verify(stockRealtimeOrderBookClient).subscribe(
+                eq(List.of("035420")),
+                any(StockOrderBookEventHandler.class)
+        );
+    }
+
+    @Test
+    void subscribeAllStocksDoesNotSubscribeWhenAllStocksAlreadySubscribed() {
+        LocalDateTime priceChangedAt = LocalDateTime.of(2026, 5, 25, 9, 0);
+        Stock samsung = new Stock("005930", "삼성전자", Market.KOSPI, 75000L, priceChangedAt);
+        given(stockRepository.findAll()).willReturn(List.of(samsung));
+        given(stockRealtimeSubscriptionRegistry.registerNewOrderBookSubscriptions(List.of("005930")))
+                .willReturn(List.of());
+
+        stockOrderBookSubscriptionService.subscribeAllStocks();
+
+        verify(stockRealtimeOrderBookClient, never()).subscribe(
+                any(),
                 any(StockOrderBookEventHandler.class)
         );
     }

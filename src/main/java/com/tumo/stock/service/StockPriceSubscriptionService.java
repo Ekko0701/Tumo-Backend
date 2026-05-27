@@ -19,6 +19,7 @@ public class StockPriceSubscriptionService {
     private final StockRepository stockRepository;
     private final StockRealtimePriceClient stockRealtimePriceClient;
     private final StockRealtimePriceService stockRealtimePriceService;
+    private final StockRealtimeSubscriptionRegistry stockRealtimeSubscriptionRegistry;
 
     /**
      * Backend에 등록된 모든 종목의 실시간 가격 이벤트 구독을 시작한다.
@@ -32,6 +33,12 @@ public class StockPriceSubscriptionService {
             return;
         }
 
-        stockRealtimePriceClient.subscribe(stockCodes, stockRealtimePriceService::handle);
+        List<String> newStockCodes = stockRealtimeSubscriptionRegistry.registerNewPriceSubscriptions(stockCodes);
+
+        if (newStockCodes.isEmpty()) {
+            return;
+        }
+
+        stockRealtimePriceClient.subscribe(newStockCodes, stockRealtimePriceService::handle);
     }
 }

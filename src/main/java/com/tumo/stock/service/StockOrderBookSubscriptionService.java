@@ -19,6 +19,7 @@ public class StockOrderBookSubscriptionService {
     private final StockRepository stockRepository;
     private final StockRealtimeOrderBookClient stockRealtimeOrderBookClient;
     private final StockOrderBookService stockOrderBookService;
+    private final StockRealtimeSubscriptionRegistry stockRealtimeSubscriptionRegistry;
 
     /**
      * Backend에 등록된 모든 종목의 실시간 호가 이벤트 구독을 시작한다.
@@ -32,6 +33,12 @@ public class StockOrderBookSubscriptionService {
             return;
         }
 
-        stockRealtimeOrderBookClient.subscribe(stockCodes, stockOrderBookService::handle);
+        List<String> newStockCodes = stockRealtimeSubscriptionRegistry.registerNewOrderBookSubscriptions(stockCodes);
+
+        if (newStockCodes.isEmpty()) {
+            return;
+        }
+
+        stockRealtimeOrderBookClient.subscribe(newStockCodes, stockOrderBookService::handle);
     }
 }
