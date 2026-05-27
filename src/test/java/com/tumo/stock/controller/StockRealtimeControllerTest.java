@@ -2,6 +2,7 @@ package com.tumo.stock.controller;
 
 import static org.mockito.Mockito.verify;
 
+import com.tumo.stock.service.StockOrderBookSubscriptionService;
 import com.tumo.stock.service.StockPriceSubscriptionService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,6 +16,9 @@ class StockRealtimeControllerTest {
     @Mock
     private StockPriceSubscriptionService stockPriceSubscriptionService;
 
+    @Mock
+    private StockOrderBookSubscriptionService stockOrderBookSubscriptionService;
+
     @InjectMocks
     private StockRealtimeController stockRealtimeController;
 
@@ -23,5 +27,12 @@ class StockRealtimeControllerTest {
         stockRealtimeController.subscribeRealtimePrices();
 
         verify(stockPriceSubscriptionService).subscribeAllStocks();
+    }
+
+    @Test
+    void subscribeRealtimeOrderBooks() {
+        stockRealtimeController.subscribeRealtimeOrderBooks();
+
+        verify(stockOrderBookSubscriptionService).subscribeAllStocks();
     }
 }
