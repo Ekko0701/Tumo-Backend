@@ -18,6 +18,9 @@ docs/
 ├── integrations/
 │   ├── README.md
 │   └── kis-realtime-websocket-guide.md
+├── test-guide/
+│   ├── README.md
+│   └── kis-websocket-test-guide.md
 ├── rules/
 │   └── backend-coding-rules.md
 ├── setup/
@@ -34,6 +37,7 @@ docs/
 | `api/` | iOS 클라이언트와 백엔드가 공유하는 API 계약 |
 | `db/` | 테이블, 컬럼, 제약조건, 계산 정책 |
 | `integrations/` | KIS 같은 외부 시스템 연동 문서 |
+| `test-guide/` | 실제 환경에서 기능을 검증하는 수동 테스트 절차 |
 | `rules/` | 백엔드 코드 작성, 에러 처리, 주석 작성 규칙 |
 | `setup/` | 로컬 개발 환경과 설정 파일 설명 |
 | `decisions/` | 주요 기술/정책 결정 기록 |
@@ -49,4 +53,6 @@ docs/
 - [application.yaml 설정](setup/application-yaml.md)
 - [외부 연동 문서](integrations/README.md)
 - [KIS 실시간 시세 WebSocket 연동 가이드](integrations/kis-realtime-websocket-guide.md)
+- [테스트 가이드 문서](test-guide/README.md)
+- [KIS WebSocket 테스트 가이드](test-guide/kis-websocket-test-guide.md)
 - [실시간 주식 시세 연동 작업 계획](decisions/realtime-stock-price-plan.md)
