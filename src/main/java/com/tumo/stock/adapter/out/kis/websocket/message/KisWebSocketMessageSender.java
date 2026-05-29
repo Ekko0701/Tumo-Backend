@@ -1,10 +1,10 @@
 package com.tumo.stock.adapter.out.kis.websocket.message;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.http.WebSocket;
 import java.util.Objects;
 import java.util.concurrent.CompletionException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * KIS WebSocket 구독 메시지를 JSON으로 변환해 WebSocket으로 전송하는 sender.
@@ -38,7 +38,7 @@ public class KisWebSocketMessageSender {
         try {
             String payload = objectMapper.writeValueAsString(message);
             webSocket.sendText(payload, true).join();
-        } catch (JsonProcessingException exception) {
+        } catch (JacksonException exception) {
             throw new IllegalStateException("KIS WebSocket 구독 메시지 변환에 실패했습니다.", exception);
         } catch (CompletionException exception) {
             throw new IllegalStateException("KIS WebSocket 구독 메시지 전송에 실패했습니다.", exception);

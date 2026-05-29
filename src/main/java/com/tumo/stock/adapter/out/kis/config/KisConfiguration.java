@@ -1,6 +1,5 @@
 package com.tumo.stock.adapter.out.kis.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tumo.stock.adapter.out.kis.auth.KisApprovalKeyClient;
 import com.tumo.stock.adapter.out.kis.websocket.client.KisRealtimeWebSocketClient;
 import com.tumo.stock.adapter.out.kis.websocket.dispatcher.KisWebSocketMessageDispatcher;
@@ -12,6 +11,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestClient;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * KIS adapter bean 설정.
