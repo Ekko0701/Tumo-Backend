@@ -39,6 +39,11 @@ public class StockPriceSubscriptionService {
             return;
         }
 
-        stockRealtimePriceClient.subscribe(newStockCodes, stockRealtimePriceService::handle);
+        try {
+            stockRealtimePriceClient.subscribe(newStockCodes, stockRealtimePriceService::handle);
+        } catch (RuntimeException exception) {
+            stockRealtimeSubscriptionRegistry.unregisterPriceSubscriptions(newStockCodes);
+            throw exception;
+        }
     }
 }

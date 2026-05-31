@@ -39,6 +39,11 @@ public class StockOrderBookSubscriptionService {
             return;
         }
 
-        stockRealtimeOrderBookClient.subscribe(newStockCodes, stockOrderBookService::handle);
+        try {
+            stockRealtimeOrderBookClient.subscribe(newStockCodes, stockOrderBookService::handle);
+        } catch (RuntimeException exception) {
+            stockRealtimeSubscriptionRegistry.unregisterOrderBookSubscriptions(newStockCodes);
+            throw exception;
+        }
     }
 }

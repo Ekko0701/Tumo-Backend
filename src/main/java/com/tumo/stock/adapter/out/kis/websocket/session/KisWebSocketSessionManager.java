@@ -75,7 +75,7 @@ public class KisWebSocketSessionManager {
     public synchronized WebSocket connect(Consumer<String> messageHandler) {
         this.messageHandler = Objects.requireNonNull(messageHandler, "KIS WebSocket message handler는 필수입니다.");
 
-        if (webSocket != null) {
+        if (isConnected(webSocket)) {
             return webSocket;
         }
 
@@ -86,6 +86,18 @@ public class KisWebSocketSessionManager {
             return webSocket;
         } catch (CompletionException exception) {
             throw new IllegalStateException("KIS WebSocket 연결에 실패했습니다.", exception);
+        }
+    }
+
+    private boolean isConnected(WebSocket webSocket) {
+        return webSocket != null
+                && !webSocket.isInputClosed()
+                && !webSocket.isOutputClosed();
+    }
+
+    private synchronized void clearClosedWebSocket(WebSocket closedWebSocket) {
+        if (webSocket == closedWebSocket) {
+            webSocket = null;
         }
     }
 
@@ -123,6 +135,20 @@ public class KisWebSocketSessionManager {
             handleText(data, last);
             webSocket.request(1);
             return WebSocket.Listener.super.onText(webSocket, data, last);
+        }
+
+        @Override
+        public CompletionStage<?> onClose(WebSocket webSocket, int statusCode, String reason) {
+            log.warn("KIS WebSocket 연결이 닫혔습니다. statusCode={}, reason={}", statusCode, reason);
+            clearClosedWebSocket(webSocket);
+            return WebSocket.Listener.super.onClose(webSocket, statusCode, reason);
+        }
+
+        @Override
+        public void onError(WebSocket webSocket, Throwable error) {
+            log.warn("KIS WebSocket 연결에서 오류가 발생했습니다.", error);
+            clearClosedWebSocket(webSocket);
+            WebSocket.Listener.super.onError(webSocket, error);
         }
 
         /**
