@@ -180,14 +180,26 @@ data: ok
 
 ```text
 com.tumo.stock.adapter.out.kis
-├── auth/
-│   ├── KisApprovalKeyClient
-│   ├── KisApprovalKeyRequest
-│   └── KisApprovalKeyResponse
 ├── config/
 │   ├── KisConfiguration
 │   └── KisProperties
+├── rest/
+│   ├── auth/
+│   │   ├── KisAccessTokenClient
+│   │   ├── KisAccessTokenRequest
+│   │   └── KisAccessTokenResponse
+│   ├── client/
+│   │   ├── KisRestClient
+│   │   └── KisRestRequest
+│   └── quotation/
+│       ├── KisInquirePriceRequest
+│       ├── KisInquirePriceResponse
+│       └── KisStockPriceQueryClient
 └── websocket/
+    ├── auth/
+    │   ├── KisApprovalKeyClient
+    │   ├── KisApprovalKeyRequest
+    │   └── KisApprovalKeyResponse
     ├── client/KisRealtimeWebSocketClient
     ├── dispatcher/KisWebSocketMessageDispatcher
     ├── message/KisWebSocketMessageSender
@@ -200,6 +212,10 @@ com.tumo.stock.adapter.out.kis
 | 클래스 | 책임 |
 |--------|------|
 | `KisProperties` | KIS App Key, App Secret, REST URL, WebSocket URL, TR ID 설정 바인딩 |
+| `KisAccessTokenClient` | KIS REST API 호출에 필요한 access token 발급 |
+| `KisRestClient` | KIS REST API 공통 header 적용과 HTTP 요청 실행 |
+| `KisRestRequest` | KIS REST API path, TR ID, query parameter, 응답 타입을 묶는 요청 값 |
+| `KisStockPriceQueryClient` | KIS REST 현재가 조회 API를 `StockPriceQueryPort`로 구현 |
 | `KisApprovalKeyClient` | WebSocket 접속에 필요한 approval key 발급 |
 | `KisRealtimeWebSocketClient` | KIS WebSocket 연결, 체결가/호가 구독/해제, raw message callback 연결 |
 | `KisWebSocketMessageSender` | 구독 메시지를 JSON으로 변환해 WebSocket으로 전송 |
@@ -212,11 +228,14 @@ com.tumo.stock.adapter.out.kis
 
 ```text
 com.tumo.stock.adapter.out.sse
-├── SseStockPricePublisher
-├── SseStockOrderBookPublisher
-├── StockPriceSseEmitterRegistry
-├── StockOrderBookSseEmitterRegistry
-└── StockRealtimeSseHeartbeatScheduler
+├── price/
+│   ├── SseStockPricePublisher
+│   └── StockPriceSseEmitterRegistry
+├── orderbook/
+│   ├── SseStockOrderBookPublisher
+│   └── StockOrderBookSseEmitterRegistry
+└── heartbeat/
+    └── StockRealtimeSseHeartbeatScheduler
 ```
 
 | 클래스 | 책임 |
@@ -226,6 +245,54 @@ com.tumo.stock.adapter.out.sse
 | `StockPriceSseEmitterRegistry` | 전체 또는 관심 종목 가격 SSE 연결 관리 |
 | `StockOrderBookSseEmitterRegistry` | 특정 종목 호가 SSE 연결 관리 |
 | `StockRealtimeSseHeartbeatScheduler` | 가격/호가 SSE 연결에 30초마다 heartbeat 전송 |
+
+### Stock port
+
+```text
+com.tumo.stock.port
+├── client/
+│   ├── StockRealtimePriceClient
+│   └── StockRealtimeOrderBookClient
+├── handler/
+│   ├── StockPriceEventHandler
+│   └── StockOrderBookEventHandler
+├── publisher/
+│   ├── StockPricePublisher
+│   └── StockOrderBookPublisher
+└── query/
+    └── StockPriceQueryPort
+```
+
+| 패키지 | 책임 |
+|--------|------|
+| `client` | 외부 실시간 시세 provider 구독/해제 계약 |
+| `handler` | 외부 provider가 수신 이벤트를 Backend use case로 넘길 callback 계약 |
+| `publisher` | 처리된 실시간 이벤트를 클라이언트 전송 adapter로 발행하는 계약 |
+| `query` | REST API나 캐시를 통한 단건 현재가 조회 계약 |
+
+### Stock service
+
+```text
+com.tumo.stock.service
+├── query/
+│   ├── StockService
+│   └── StockRealtimeSubscriptionQueryService
+├── realtime/
+│   ├── StockRealtimePriceService
+│   └── StockOrderBookService
+├── registry/
+│   └── StockRealtimeSubscriptionRegistry
+└── subscription/
+    ├── StockPriceSubscriptionService
+    └── StockOrderBookSubscriptionService
+```
+
+| 패키지 | 책임 |
+|--------|------|
+| `query` | 조회성 use case 처리 |
+| `realtime` | KIS에서 들어온 실시간 가격/호가 이벤트 처리 |
+| `registry` | Backend가 현재 구독 중인 종목 상태 관리 |
+| `subscription` | DB 종목 목록을 기준으로 외부 provider 구독 시작 |
 
 ## 설정
 

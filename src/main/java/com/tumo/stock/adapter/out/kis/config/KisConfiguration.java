@@ -1,9 +1,9 @@
 package com.tumo.stock.adapter.out.kis.config;
 
-import com.tumo.stock.adapter.out.kis.auth.KisAccessTokenClient;
-import com.tumo.stock.adapter.out.kis.auth.KisApprovalKeyClient;
-import com.tumo.stock.adapter.out.kis.quotation.KisStockPriceQueryClient;
-import com.tumo.stock.adapter.out.kis.rest.KisRestClient;
+import com.tumo.stock.adapter.out.kis.rest.auth.KisAccessTokenClient;
+import com.tumo.stock.adapter.out.kis.websocket.auth.KisApprovalKeyClient;
+import com.tumo.stock.adapter.out.kis.rest.quotation.KisStockPriceQueryClient;
+import com.tumo.stock.adapter.out.kis.rest.client.KisRestClient;
 import com.tumo.stock.adapter.out.kis.websocket.client.KisRealtimeWebSocketClient;
 import com.tumo.stock.adapter.out.kis.websocket.dispatcher.KisWebSocketMessageDispatcher;
 import com.tumo.stock.adapter.out.kis.websocket.message.KisWebSocketMessageSender;

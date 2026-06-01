@@ -1,15 +1,15 @@
 package com.tumo.stock.adapter.out.kis.websocket.client;
 
-import com.tumo.stock.adapter.out.kis.auth.KisApprovalKeyClient;
+import com.tumo.stock.adapter.out.kis.websocket.auth.KisApprovalKeyClient;
 import com.tumo.stock.adapter.out.kis.config.KisProperties;
 import com.tumo.stock.adapter.out.kis.websocket.dispatcher.KisWebSocketMessageDispatcher;
 import com.tumo.stock.adapter.out.kis.websocket.message.KisWebSocketMessageSender;
 import com.tumo.stock.adapter.out.kis.websocket.message.KisWebSocketSubscribeMessage;
 import com.tumo.stock.adapter.out.kis.websocket.session.KisWebSocketSessionManager;
-import com.tumo.stock.port.StockOrderBookEventHandler;
-import com.tumo.stock.port.StockPriceEventHandler;
-import com.tumo.stock.port.StockRealtimeOrderBookClient;
-import com.tumo.stock.port.StockRealtimePriceClient;
+import com.tumo.stock.port.handler.StockOrderBookEventHandler;
+import com.tumo.stock.port.handler.StockPriceEventHandler;
+import com.tumo.stock.port.client.StockRealtimeOrderBookClient;
+import com.tumo.stock.port.client.StockRealtimePriceClient;
 import java.net.http.WebSocket;
 import java.util.Collection;
 import java.util.List;

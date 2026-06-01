@@ -6,7 +6,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.tumo.stock.adapter.out.kis.auth.KisApprovalKeyClient;
+import com.tumo.stock.adapter.out.kis.websocket.auth.KisApprovalKeyClient;
 import com.tumo.stock.adapter.out.kis.config.KisProperties;
 import com.tumo.stock.adapter.out.kis.websocket.dispatcher.KisWebSocketMessageDispatcher;
 import com.tumo.stock.adapter.out.kis.websocket.message.KisWebSocketMessageSender;
@@ -15,8 +15,8 @@ import com.tumo.stock.adapter.out.kis.websocket.parser.KisTradePriceMessageParse
 import com.tumo.stock.adapter.out.kis.websocket.session.KisWebSocketSessionManager;
 import com.tumo.stock.domain.orderbook.StockOrderBookEvent;
 import com.tumo.stock.domain.price.StockPriceEvent;
-import com.tumo.stock.port.StockOrderBookEventHandler;
-import com.tumo.stock.port.StockPriceEventHandler;
+import com.tumo.stock.port.handler.StockOrderBookEventHandler;
+import com.tumo.stock.port.handler.StockPriceEventHandler;
 import java.net.http.WebSocket;
 import java.util.ArrayList;
 import java.util.List;

@@ -2,7 +2,7 @@ package com.tumo.stock.controller;
 
 import com.tumo.stock.dto.StockListResponse;
 import com.tumo.stock.dto.StockResponse;
-import com.tumo.stock.service.StockService;
+import com.tumo.stock.service.query.StockService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
