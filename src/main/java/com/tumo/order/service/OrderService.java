@@ -25,6 +25,7 @@ public class OrderService {
     private final StockRepository stockRepository;
     private final OrderRepository orderRepository;
     private final HoldingRepository holdingRepository;
+    private final StockOrderPriceResolver stockOrderPriceResolver;
 
     @Transactional
     public OrderResponse buy(Long userId, OrderRequest request) {
@@ -33,7 +34,7 @@ public class OrderService {
         Stock stock = stockRepository.findByStockCode(request.stockCode())
                 .orElseThrow(() -> new BusinessException(ErrorCode.STOCK_NOT_FOUND));
 
-        Long executedPrice = stock.getCurrentPrice();
+        Long executedPrice = stockOrderPriceResolver.resolve(stock);
         Long totalAmount = executedPrice * request.quantity();
         user.decreaseCashBalance(totalAmount);
 

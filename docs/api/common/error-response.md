@@ -110,6 +110,7 @@ ErrorResponse.of(ErrorCode.INVALID_REQUEST, fieldErrors)
 | 404 | STOCK_NOT_FOUND | 종목을 찾을 수 없습니다. | 요청한 종목 코드에 해당하는 종목 없음 |
 | 405 | METHOD_NOT_ALLOWED | 지원하지 않는 HTTP 메서드입니다. | API가 지원하지 않는 HTTP Method 요청 |
 | 409 | DUPLICATED_EMAIL | 이미 사용 중인 이메일입니다. | 회원가입 이메일 중복 |
+| 503 | STOCK_PRICE_UNAVAILABLE | 현재가를 조회할 수 없습니다. | 주문 체결에 사용할 최신 현재가를 조회할 수 없는 경우 |
 | 500 | INTERNAL_SERVER_ERROR | 서버 내부 오류가 발생했습니다. | 예상하지 못한 서버 오류 |
 
 ## 클라이언트 처리 기준
@@ -140,6 +141,9 @@ NOT_FOUND
 
 STOCK_NOT_FOUND
 → 종목 코드 확인
+
+STOCK_PRICE_UNAVAILABLE
+→ 현재가 조회 실패 안내 표시, 잠시 후 재시도 유도
 
 INTERNAL_SERVER_ERROR
 → 일반 서버 오류 안내 표시

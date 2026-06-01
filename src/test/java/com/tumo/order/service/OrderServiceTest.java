@@ -45,6 +45,9 @@ class OrderServiceTest {
     @Mock
     private HoldingRepository holdingRepository;
 
+    @Mock
+    private StockOrderPriceResolver stockOrderPriceResolver;
+
     @InjectMocks
     private OrderService orderService;
 
@@ -67,6 +70,7 @@ class OrderServiceTest {
             return order;
         });
         given(holdingRepository.findByUserAndStock(user, stock)).willReturn(Optional.empty());
+        given(stockOrderPriceResolver.resolve(stock)).willReturn(76000L);
 
         OrderResponse response = orderService.buy(1L, new OrderRequest("005930", 10L, OrderType.BUY));
 
@@ -76,9 +80,9 @@ class OrderServiceTest {
         assertThat(response.stockName()).isEqualTo("삼성전자");
         assertThat(response.orderType()).isEqualTo("BUY");
         assertThat(response.quantity()).isEqualTo(10L);
-        assertThat(response.executedPrice()).isEqualTo(75000L);
-        assertThat(response.totalAmount()).isEqualTo(750000L);
-        assertThat(response.cashBalance()).isEqualTo(9250000L);
+        assertThat(response.executedPrice()).isEqualTo(76000L);
+        assertThat(response.totalAmount()).isEqualTo(760000L);
+        assertThat(response.cashBalance()).isEqualTo(9240000L);
     }
 
     @Test
@@ -101,6 +105,7 @@ class OrderServiceTest {
             return order;
         });
         given(holdingRepository.findByUserAndStock(user, stock)).willReturn(Optional.of(holding));
+        given(stockOrderPriceResolver.resolve(stock)).willReturn(80000L);
 
         orderService.buy(1L, new OrderRequest("005930", 5L, OrderType.BUY));
 
@@ -152,6 +157,7 @@ class OrderServiceTest {
         );
         given(userRepository.findById(1L)).willReturn(Optional.of(user));
         given(stockRepository.findByStockCode("005930")).willReturn(Optional.of(stock));
+        given(stockOrderPriceResolver.resolve(stock)).willReturn(11000000L);
 
         assertThatThrownBy(() -> orderService.buy(1L, new OrderRequest("005930", 1L, OrderType.BUY)))
                 .isInstanceOfSatisfying(BusinessException.class, exception ->
@@ -160,5 +166,31 @@ class OrderServiceTest {
 
         verify(orderRepository, never()).save(any(Order.class));
         verify(holdingRepository, never()).save(any(Holding.class));
+    }
+
+    @Test
+    void buyThrowsExceptionWhenOrderPriceIsUnavailable() {
+        User user = new User("test@example.com", "encoded-password", "tester");
+        ReflectionTestUtils.setField(user, "id", 1L);
+        Stock stock = new Stock(
+                "005930",
+                "삼성전자",
+                Market.KOSPI,
+                75000L,
+                LocalDateTime.of(2026, 5, 13, 15, 30)
+        );
+        given(userRepository.findById(1L)).willReturn(Optional.of(user));
+        given(stockRepository.findByStockCode("005930")).willReturn(Optional.of(stock));
+        given(stockOrderPriceResolver.resolve(stock))
+                .willThrow(new BusinessException(ErrorCode.STOCK_PRICE_UNAVAILABLE));
+
+        assertThatThrownBy(() -> orderService.buy(1L, new OrderRequest("005930", 10L, OrderType.BUY)))
+                .isInstanceOfSatisfying(BusinessException.class, exception ->
+                        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.STOCK_PRICE_UNAVAILABLE)
+                );
+
+        verify(orderRepository, never()).save(any(Order.class));
+        verify(holdingRepository, never()).save(any(Holding.class));
+        assertThat(user.getCashBalance()).isEqualTo(10_000_000L);
     }
 }
