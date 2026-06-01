@@ -1,7 +1,6 @@
 package com.tumo.stock.controller.realtime;
 
 import com.tumo.stock.dto.StockRealtimeSubscriptionResponse;
-import com.tumo.stock.service.subscription.StockOrderBookSubscriptionService;
 import com.tumo.stock.service.subscription.StockPriceSubscriptionService;
 import com.tumo.stock.service.query.StockRealtimeSubscriptionQueryService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class StockRealtimeController {
 
     private final StockPriceSubscriptionService stockPriceSubscriptionService;
-    private final StockOrderBookSubscriptionService stockOrderBookSubscriptionService;
     private final StockRealtimeSubscriptionQueryService stockRealtimeSubscriptionQueryService;
 
     @GetMapping("/subscriptions")
@@ -35,12 +33,5 @@ public class StockRealtimeController {
     @Operation(summary = "실시간 체결가 구독 시작", description = "Backend에 등록된 모든 종목의 KIS 실시간 체결가 구독을 시작합니다.")
     public void subscribeRealtimePrices() {
         stockPriceSubscriptionService.subscribeAllStocks();
-    }
-
-    @PostMapping("/order-books/subscribe")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @Operation(summary = "실시간 호가 구독 시작", description = "Backend에 등록된 모든 종목의 KIS 실시간 호가 구독을 시작합니다.")
-    public void subscribeRealtimeOrderBooks() {
-        stockOrderBookSubscriptionService.subscribeAllStocks();
     }
 }

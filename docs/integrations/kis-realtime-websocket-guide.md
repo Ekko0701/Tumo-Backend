@@ -79,15 +79,15 @@ StockRealtimeController
 ### 실시간 호가 구독 시작
 
 ```http
-POST /api/v1/internal/stocks/realtime/order-books/subscribe
+POST /api/v1/internal/stocks/{stockCode}/realtime/order-book/subscribe
 ```
 
 동작:
 
 ```text
 StockRealtimeController
-→ StockOrderBookSubscriptionService.subscribeAllStocks()
-→ DB에 저장된 모든 Stock 조회
+→ StockOrderBookSubscriptionService.subscribe(stockCode)
+→ stockCode에 해당하는 Stock 존재 여부 확인
 → 이미 구독 중인 종목 제외
 → StockRealtimeOrderBookClient.subscribe(...)
 → KisRealtimeWebSocketClient
@@ -355,7 +355,7 @@ curl -i -X POST http://localhost:8080/api/v1/internal/stocks/realtime/subscribe
 ```
 
 ```bash
-curl -i -X POST http://localhost:8080/api/v1/internal/stocks/realtime/order-books/subscribe
+curl -i -X POST http://localhost:8080/api/v1/internal/stocks/005930/realtime/order-book/subscribe
 ```
 
 ## 참고 자료

@@ -1,6 +1,7 @@
 package com.tumo.stock.service.subscription;
 
-import com.tumo.stock.domain.stock.Stock;
+import com.tumo.global.error.BusinessException;
+import com.tumo.global.error.ErrorCode;
 import com.tumo.stock.port.client.StockRealtimeOrderBookClient;
 import com.tumo.stock.repository.StockRepository;
 import com.tumo.stock.service.realtime.StockOrderBookService;
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Backend에 등록된 종목의 실시간 호가 구독을 시작하는 서비스.
+ * 단일 종목의 실시간 호가 구독을 시작하는 서비스.
  */
 @Service
 @RequiredArgsConstructor
@@ -24,18 +25,15 @@ public class StockOrderBookSubscriptionService {
     private final StockRealtimeSubscriptionRegistry stockRealtimeSubscriptionRegistry;
 
     /**
-     * Backend에 등록된 모든 종목의 실시간 호가 이벤트 구독을 시작한다.
+     * 단일 종목의 실시간 호가 이벤트 구독을 시작한다.
+     *
+     * @param stockCode 실시간 호가 이벤트를 구독할 종목 코드
      */
-    public void subscribeAllStocks() {
-        List<String> stockCodes = stockRepository.findAll().stream()
-                .map(Stock::getStockCode)
-                .toList();
+    public void subscribe(String stockCode) {
+        stockRepository.findByStockCode(stockCode)
+                .orElseThrow(() -> new BusinessException(ErrorCode.STOCK_NOT_FOUND));
 
-        if (stockCodes.isEmpty()) {
-            return;
-        }
-
-        List<String> newStockCodes = stockRealtimeSubscriptionRegistry.registerNewOrderBookSubscriptions(stockCodes);
+        List<String> newStockCodes = stockRealtimeSubscriptionRegistry.registerNewOrderBookSubscriptions(List.of(stockCode));
 
         if (newStockCodes.isEmpty()) {
             return;

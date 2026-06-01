@@ -5,7 +5,6 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
 import com.tumo.stock.dto.StockRealtimeSubscriptionResponse;
-import com.tumo.stock.service.subscription.StockOrderBookSubscriptionService;
 import com.tumo.stock.service.subscription.StockPriceSubscriptionService;
 import com.tumo.stock.service.query.StockRealtimeSubscriptionQueryService;
 import java.util.List;
@@ -20,9 +19,6 @@ class StockRealtimeControllerTest {
 
     @Mock
     private StockPriceSubscriptionService stockPriceSubscriptionService;
-
-    @Mock
-    private StockOrderBookSubscriptionService stockOrderBookSubscriptionService;
 
     @Mock
     private StockRealtimeSubscriptionQueryService stockRealtimeSubscriptionQueryService;
@@ -48,12 +44,5 @@ class StockRealtimeControllerTest {
         stockRealtimeController.subscribeRealtimePrices();
 
         verify(stockPriceSubscriptionService).subscribeAllStocks();
-    }
-
-    @Test
-    void subscribeRealtimeOrderBooks() {
-        stockRealtimeController.subscribeRealtimeOrderBooks();
-
-        verify(stockOrderBookSubscriptionService).subscribeAllStocks();
     }
 }

@@ -152,11 +152,11 @@ data: {...}
 
 ## 4. KIS 실시간 호가 구독 시작
 
-Backend가 KIS에서 실시간 호가를 받기 시작하도록 내부 API를 호출한다.
+Backend가 KIS에서 특정 종목의 실시간 호가를 받기 시작하도록 내부 API를 호출한다.
 
 ```bash
 curl -i -X POST \
-  "http://localhost:8080/api/v1/internal/stocks/realtime/order-books/subscribe"
+  "http://localhost:8080/api/v1/internal/stocks/005930/realtime/order-book/subscribe"
 ```
 
 정상 기준:
@@ -186,7 +186,7 @@ curl -s \
 ```json
 {
   "priceStockCodes": ["005930", "000660"],
-  "orderBookStockCodes": ["005930", "000660"]
+  "orderBookStockCodes": ["005930"]
 }
 ```
 
