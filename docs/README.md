@@ -21,6 +21,8 @@ docs/
 ├── test-guide/
 │   ├── README.md
 │   └── kis-websocket-test-guide.md
+├── Plan/
+│   └── 0601-StockList.md
 ├── FUTURE.md
 ├── rules/
 │   └── backend-coding-rules.md
@@ -39,6 +41,7 @@ docs/
 | `db/` | 테이블, 컬럼, 제약조건, 계산 정책 |
 | `integrations/` | KIS 같은 외부 시스템 연동 문서 |
 | `test-guide/` | 실제 환경에서 기능을 검증하는 수동 테스트 절차 |
+| `Plan/` | 날짜별 기능 구현 계획 |
 | `FUTURE.md` | 나중에 수정, 리팩토링, 개선할 항목 |
 | `rules/` | 백엔드 코드 작성, 에러 처리, 주석 작성 규칙 |
 | `setup/` | 로컬 개발 환경과 설정 파일 설명 |
@@ -57,5 +60,6 @@ docs/
 - [KIS 실시간 시세 WebSocket 연동 가이드](integrations/kis-realtime-websocket-guide.md)
 - [테스트 가이드 문서](test-guide/README.md)
 - [KIS WebSocket 테스트 가이드](test-guide/kis-websocket-test-guide.md)
+- [0601 Stock List 구현 계획](Plan/0601-StockList.md)
 - [Future Improvements](FUTURE.md)
 - [실시간 주식 시세 연동 작업 계획](decisions/realtime-stock-price-plan.md)
