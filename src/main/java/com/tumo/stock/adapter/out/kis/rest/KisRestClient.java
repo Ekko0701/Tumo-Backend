@@ -2,7 +2,6 @@ package com.tumo.stock.adapter.out.kis.rest;
 
 import com.tumo.stock.adapter.out.kis.auth.KisAccessTokenClient;
 import com.tumo.stock.adapter.out.kis.config.KisProperties;
-import java.util.Map;
 import java.util.Objects;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.client.RestClient;
@@ -69,32 +68,22 @@ public class KisRestClient {
     /**
      * KIS REST GET API를 호출한다.
      *
-     * @param path KIS REST API path
-     * @param transactionId KIS REST API transaction id
-     * @param queryParameters query parameter 목록
-     * @param responseType 응답 body를 변환할 타입
+     * @param request KIS REST GET API 요청 값
      * @return 변환된 응답 body
      * @param <T> 응답 body 타입
      */
-    public <T> T get(
-            String path,
-            String transactionId,
-            Map<String, String> queryParameters,
-            Class<T> responseType
-    ) {
-        validateRequest(path, transactionId, responseType);
+    public <T> T get(KisRestRequest<T> request) {
+        Objects.requireNonNull(request, "KIS REST API 요청 값은 필수입니다.");
 
         return restClient.get()
                 .uri(uriBuilder -> {
-                    uriBuilder.path(path);
-                    if (queryParameters != null) {
-                        queryParameters.forEach(uriBuilder::queryParam);
-                    }
+                    uriBuilder.path(request.path());
+                    request.queryParameters().forEach(uriBuilder::queryParam);
                     return uriBuilder.build();
                 })
-                .headers(headers -> applyKisHeaders(headers, transactionId))
+                .headers(headers -> applyKisHeaders(headers, request.transactionId()))
                 .retrieve()
-                .body(responseType);
+                .body(request.responseType());
     }
 
     private void applyKisHeaders(HttpHeaders headers, String transactionId) {
@@ -102,17 +91,5 @@ public class KisRestClient {
         headers.set(APP_KEY_HEADER, properties.appKey());
         headers.set(APP_SECRET_HEADER, properties.appSecret());
         headers.set(TRANSACTION_ID_HEADER, transactionId);
-    }
-
-    private <T> void validateRequest(String path, String transactionId, Class<T> responseType) {
-        if (path == null || path.isBlank()) {
-            throw new IllegalArgumentException("KIS REST API path는 필수입니다.");
-        }
-
-        if (transactionId == null || transactionId.isBlank()) {
-            throw new IllegalArgumentException("KIS REST API transaction id는 필수입니다.");
-        }
-
-        Objects.requireNonNull(responseType, "KIS REST API 응답 타입은 필수입니다.");
     }
 }

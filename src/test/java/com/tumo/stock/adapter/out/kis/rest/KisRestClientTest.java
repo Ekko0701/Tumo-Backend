@@ -11,6 +11,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.tumo.stock.adapter.out.kis.auth.KisAccessTokenClient;
 import com.tumo.stock.adapter.out.kis.config.KisProperties;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
@@ -48,15 +49,16 @@ class KisRestClientTest {
                         }
                         """, MediaType.APPLICATION_JSON));
 
-        TestKisResponse response = client.get(
+        Map<String, String> queryParameters = new LinkedHashMap<>();
+        queryParameters.put("FID_COND_MRKT_DIV_CODE", "J");
+        queryParameters.put("FID_INPUT_ISCD", "005930");
+
+        TestKisResponse response = client.get(KisRestRequest.get(
                 "/uapi/domestic-stock/v1/quotations/inquire-price",
                 "FHKST01010100",
-                Map.of(
-                        "FID_COND_MRKT_DIV_CODE", "J",
-                        "FID_INPUT_ISCD", "005930"
-                ),
+                queryParameters,
                 TestKisResponse.class
-        );
+        ));
 
         assertThat(response.code()).isEqualTo("0");
         assertThat(response.message()).isEqualTo("정상처리 되었습니다.");
@@ -83,52 +85,47 @@ class KisRestClientTest {
                         }
                         """, MediaType.APPLICATION_JSON));
 
-        TestKisResponse response = client.get(
+        TestKisResponse response = client.get(KisRestRequest.get(
                 "/uapi/test",
                 "TEST_TR_ID",
                 null,
                 TestKisResponse.class
-        );
+        ));
 
         assertThat(response.code()).isEqualTo("0");
         server.verify();
     }
 
     @Test
-    void getThrowsExceptionWhenPathIsBlank() {
+    void getThrowsExceptionWhenRequestIsNull() {
         KisRestClient client = new KisRestClient(
                 RestClient.builder(),
                 accessTokenClient,
                 properties("test-app-key", "test-app-secret")
         );
 
-        assertThatThrownBy(() -> client.get(" ", "TEST_TR_ID", Map.of(), TestKisResponse.class))
+        assertThatThrownBy(() -> client.get(null))
+                .isInstanceOf(NullPointerException.class)
+                .hasMessage("KIS REST API 요청 값은 필수입니다.");
+    }
+
+    @Test
+    void requestThrowsExceptionWhenPathIsBlank() {
+        assertThatThrownBy(() -> KisRestRequest.get(" ", "TEST_TR_ID", Map.of(), TestKisResponse.class))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("KIS REST API path는 필수입니다.");
     }
 
     @Test
-    void getThrowsExceptionWhenTransactionIdIsBlank() {
-        KisRestClient client = new KisRestClient(
-                RestClient.builder(),
-                accessTokenClient,
-                properties("test-app-key", "test-app-secret")
-        );
-
-        assertThatThrownBy(() -> client.get("/uapi/test", " ", Map.of(), TestKisResponse.class))
+    void requestThrowsExceptionWhenTransactionIdIsBlank() {
+        assertThatThrownBy(() -> KisRestRequest.get("/uapi/test", " ", Map.of(), TestKisResponse.class))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("KIS REST API transaction id는 필수입니다.");
     }
 
     @Test
-    void getThrowsExceptionWhenResponseTypeIsNull() {
-        KisRestClient client = new KisRestClient(
-                RestClient.builder(),
-                accessTokenClient,
-                properties("test-app-key", "test-app-secret")
-        );
-
-        assertThatThrownBy(() -> client.get("/uapi/test", "TEST_TR_ID", Map.of(), null))
+    void requestThrowsExceptionWhenResponseTypeIsNull() {
+        assertThatThrownBy(() -> KisRestRequest.get("/uapi/test", "TEST_TR_ID", Map.of(), null))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("KIS REST API 응답 타입은 필수입니다.");
     }
