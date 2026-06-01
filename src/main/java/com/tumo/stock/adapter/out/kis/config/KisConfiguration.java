@@ -1,5 +1,6 @@
 package com.tumo.stock.adapter.out.kis.config;
 
+import com.tumo.stock.adapter.out.kis.auth.KisAccessTokenClient;
 import com.tumo.stock.adapter.out.kis.auth.KisApprovalKeyClient;
 import com.tumo.stock.adapter.out.kis.websocket.client.KisRealtimeWebSocketClient;
 import com.tumo.stock.adapter.out.kis.websocket.dispatcher.KisWebSocketMessageDispatcher;
@@ -18,6 +19,22 @@ import tools.jackson.databind.ObjectMapper;
  */
 @Configuration
 public class KisConfiguration {
+
+    /**
+     * KIS REST access token 발급 client bean을 생성한다.
+     *
+     * @param restClientBuilder Spring RestClient builder
+     * @param properties KIS Open API 연동 설정 값
+     * @return KIS REST access token 발급 client
+     */
+    @Bean
+    @ConditionalOnProperty(prefix = "kis", name = "enabled", havingValue = "true")
+    KisAccessTokenClient kisAccessTokenClient(
+            RestClient.Builder restClientBuilder,
+            KisProperties properties
+    ) {
+        return new KisAccessTokenClient(restClientBuilder, properties);
+    }
 
     /**
      * KIS WebSocket approval key 발급 client bean을 생성한다.
