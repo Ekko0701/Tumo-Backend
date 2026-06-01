@@ -18,7 +18,7 @@ class StockMasterFileParserTest {
                 "005930",
                 "KR7005930003",
                 "삼성전자",
-                buildPart2(228, 41, "ST", "000080000")
+                buildPart2(227, 41, "ST", "000080000")
         );
         StockMasterFile stockMasterFile = new StockMasterFile(Market.KOSPI, content.getBytes(KIS_MASTER_CHARSET));
 
@@ -39,7 +39,7 @@ class StockMasterFileParserTest {
                 "247540",
                 "KR7247540008",
                 "에코프로비엠",
-                buildPart2(222, 36, "ST", "000210000")
+                buildPart2(221, 36, "ST", "000210000")
         );
         StockMasterFile stockMasterFile = new StockMasterFile(Market.KOSDAQ, content.getBytes(KIS_MASTER_CHARSET));
 
@@ -57,8 +57,8 @@ class StockMasterFileParserTest {
     @Test
     void skipsNonStockGroupRows() {
         String content = String.join("\n",
-                buildLine("005930", "KR7005930003", "삼성전자", buildPart2(228, 41, "ST", "000080000")),
-                buildLine("069500", "KR7069500007", "KODEX 200", buildPart2(228, 41, "EF", "000040000"))
+                buildLine("005930", "KR7005930003", "삼성전자", buildPart2(227, 41, "ST", "000080000")),
+                buildLine("069500", "KR7069500007", "KODEX 200", buildPart2(227, 41, "EF", "000040000"))
         );
         StockMasterFile stockMasterFile = new StockMasterFile(Market.KOSPI, content.getBytes(KIS_MASTER_CHARSET));
 

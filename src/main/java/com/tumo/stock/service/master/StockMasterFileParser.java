@@ -23,8 +23,12 @@ public class StockMasterFileParser {
     private static final int STANDARD_CODE_LENGTH = 12;
     private static final int NAME_START_INDEX = SHORT_CODE_LENGTH + STANDARD_CODE_LENGTH;
 
+    /*
+     * KIS 공식 샘플은 개행 문자가 포함된 row 기준으로 KOSPI 228, KOSDAQ 222를 사용한다.
+     * BufferedReader.readLine()은 개행 문자를 제거하므로 Java 파서는 실제 데이터 영역 길이만 사용한다.
+     */
     private static final StockMasterFormat KOSPI_FORMAT = new StockMasterFormat(
-            228,
+            227,
             new int[]{
                     2, 1, 4, 4, 4, 1, 1, 1, 1, 1,
                     1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -34,7 +38,7 @@ public class StockMasterFileParser {
             31
     );
     private static final StockMasterFormat KOSDAQ_FORMAT = new StockMasterFormat(
-            222,
+            221,
             new int[]{
                     2, 1, 4, 4, 4, 1, 1, 1, 1, 1,
                     1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
