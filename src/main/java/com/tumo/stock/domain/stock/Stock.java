@@ -60,4 +60,10 @@ public class Stock {
         this.priceChangedAt = priceChangedAt;
         this.updatedAt = LocalDateTime.now();
     }
+
+    public void updateMasterInfo(String stockName, Market market) {
+        this.stockName = stockName;
+        this.market = market;
+        this.updatedAt = LocalDateTime.now();
+    }
 }
