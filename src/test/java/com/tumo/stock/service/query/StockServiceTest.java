@@ -3,13 +3,16 @@ package com.tumo.stock.service.query;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 
 import com.tumo.global.error.BusinessException;
 import com.tumo.global.error.ErrorCode;
 import com.tumo.stock.domain.price.StockPrice;
 import com.tumo.stock.domain.stock.Market;
 import com.tumo.stock.domain.stock.Stock;
-import com.tumo.stock.dto.StockListResponse;
+import com.tumo.stock.dto.StockPageResponse;
 import com.tumo.stock.dto.StockResponse;
 import com.tumo.stock.port.query.StockPriceQueryPort;
 import com.tumo.stock.repository.StockRepository;
@@ -20,8 +23,12 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 @ExtendWith(MockitoExtension.class)
 class StockServiceTest {
@@ -41,7 +48,8 @@ class StockServiceTest {
         LocalDateTime refreshedAt = LocalDateTime.of(2026, 6, 1, 10, 0);
         Stock samsung = new Stock("005930", "삼성전자", Market.KOSPI, 75000L, priceChangedAt);
         Stock skHynix = new Stock("000660", "SK하이닉스", Market.KOSPI, 180000L, priceChangedAt);
-        given(stockRepository.findAll()).willReturn(List.of(samsung, skHynix));
+        given(stockRepository.findByMarket(eq(Market.KOSPI), any(Pageable.class)))
+                .willReturn(new PageImpl<>(List.of(samsung, skHynix), PageRequest.of(0, 30), 31));
         given(stockPriceQueryPort.findCurrentPrice("005930"))
                 .willReturn(Optional.of(new StockPrice(
                         "005930",
@@ -61,9 +69,12 @@ class StockServiceTest {
                         refreshedAt
                 )));
 
-        StockListResponse response = stockService.getStocks();
+        StockPageResponse response = stockService.getStocks(Market.KOSPI, 0, 30);
 
         assertThat(response.stocks()).hasSize(2);
+        assertThat(response.page()).isEqualTo(0);
+        assertThat(response.size()).isEqualTo(30);
+        assertThat(response.hasNext()).isTrue();
         assertThat(response.stocks())
                 .extracting(StockResponse::stockCode)
                 .containsExactly("005930", "000660");
@@ -77,13 +88,32 @@ class StockServiceTest {
     }
 
     @Test
+    void getStocksUsesStockNameAndStockCodeSort() {
+        given(stockRepository.findByMarket(eq(Market.KOSPI), any(Pageable.class)))
+                .willReturn(new PageImpl<>(List.of(), PageRequest.of(1, 20), 0));
+        ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+
+        stockService.getStocks(Market.KOSPI, 1, 20);
+
+        verify(stockRepository).findByMarket(eq(Market.KOSPI), pageableCaptor.capture());
+        Pageable pageable = pageableCaptor.getValue();
+        assertThat(pageable.getPageNumber()).isEqualTo(1);
+        assertThat(pageable.getPageSize()).isEqualTo(20);
+        assertThat(pageable.getSort().getOrderFor("stockName")).isNotNull();
+        assertThat(pageable.getSort().getOrderFor("stockName").isAscending()).isTrue();
+        assertThat(pageable.getSort().getOrderFor("stockCode")).isNotNull();
+        assertThat(pageable.getSort().getOrderFor("stockCode").isAscending()).isTrue();
+    }
+
+    @Test
     void getStocksUsesStoredPriceWhenCurrentPriceIsEmpty() {
         LocalDateTime priceChangedAt = LocalDateTime.of(2026, 5, 13, 15, 30);
         Stock samsung = new Stock("005930", "삼성전자", Market.KOSPI, 75000L, priceChangedAt);
-        given(stockRepository.findAll()).willReturn(List.of(samsung));
+        given(stockRepository.findByMarket(eq(Market.KOSPI), any(Pageable.class)))
+                .willReturn(new PageImpl<>(List.of(samsung), PageRequest.of(0, 30), 1));
         given(stockPriceQueryPort.findCurrentPrice("005930")).willReturn(Optional.empty());
 
-        StockListResponse response = stockService.getStocks();
+        StockPageResponse response = stockService.getStocks(Market.KOSPI, 0, 30);
 
         assertThat(response.stocks()).hasSize(1);
         assertThat(response.stocks().getFirst().currentPrice()).isEqualTo(75000L);
@@ -96,10 +126,11 @@ class StockServiceTest {
     void getStocksUsesStoredPriceWhenCurrentPriceQueryFails() {
         LocalDateTime priceChangedAt = LocalDateTime.of(2026, 5, 13, 15, 30);
         Stock samsung = new Stock("005930", "삼성전자", Market.KOSPI, 75000L, priceChangedAt);
-        given(stockRepository.findAll()).willReturn(List.of(samsung));
+        given(stockRepository.findByMarket(eq(Market.KOSPI), any(Pageable.class)))
+                .willReturn(new PageImpl<>(List.of(samsung), PageRequest.of(0, 30), 1));
         given(stockPriceQueryPort.findCurrentPrice("005930")).willThrow(new RuntimeException("KIS error"));
 
-        StockListResponse response = stockService.getStocks();
+        StockPageResponse response = stockService.getStocks(Market.KOSPI, 0, 30);
 
         assertThat(response.stocks()).hasSize(1);
         assertThat(response.stocks().getFirst().currentPrice()).isEqualTo(75000L);

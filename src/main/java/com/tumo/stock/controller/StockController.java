@@ -1,6 +1,7 @@
 package com.tumo.stock.controller;
 
-import com.tumo.stock.dto.StockListResponse;
+import com.tumo.stock.domain.stock.Market;
+import com.tumo.stock.dto.StockPageResponse;
 import com.tumo.stock.dto.StockResponse;
 import com.tumo.stock.service.query.StockService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -9,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -20,9 +22,13 @@ public class StockController {
     private final StockService stockService;
 
     @GetMapping
-    @Operation(summary = "종목 목록 조회", description = "거래 가능한 종목 목록을 조회합니다.")
-    public StockListResponse getStocks() {
-        return stockService.getStocks();
+    @Operation(summary = "종목 목록 조회", description = "시장별 종목 목록을 page 단위로 조회합니다.")
+    public StockPageResponse getStocks(
+            @RequestParam Market market,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "30") int size
+    ) {
+        return stockService.getStocks(market, page, size);
     }
 
     @GetMapping("/{stockCode}")
