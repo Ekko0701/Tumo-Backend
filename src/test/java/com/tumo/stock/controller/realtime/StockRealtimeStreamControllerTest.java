@@ -6,11 +6,14 @@ import static org.mockito.Mockito.verify;
 
 import com.tumo.stock.adapter.out.sse.orderbook.StockOrderBookSseEmitterRegistry;
 import com.tumo.stock.adapter.out.sse.price.StockPriceSseEmitterRegistry;
+import com.tumo.stock.service.subscription.StockOrderBookSubscriptionService;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -22,6 +25,9 @@ class StockRealtimeStreamControllerTest {
 
     @Mock
     private StockOrderBookSseEmitterRegistry stockOrderBookSseEmitterRegistry;
+
+    @Mock
+    private StockOrderBookSubscriptionService stockOrderBookSubscriptionService;
 
     @InjectMocks
     private StockRealtimeStreamController stockRealtimeStreamController;
@@ -46,6 +52,8 @@ class StockRealtimeStreamControllerTest {
         SseEmitter emitter = stockRealtimeStreamController.streamRealtimeOrderBook("005930");
 
         assertThat(emitter).isEqualTo(expectedEmitter);
-        verify(stockOrderBookSseEmitterRegistry).connect("005930");
+        InOrder inOrder = Mockito.inOrder(stockOrderBookSubscriptionService, stockOrderBookSseEmitterRegistry);
+        inOrder.verify(stockOrderBookSubscriptionService).subscribe("005930");
+        inOrder.verify(stockOrderBookSseEmitterRegistry).connect("005930");
     }
 }

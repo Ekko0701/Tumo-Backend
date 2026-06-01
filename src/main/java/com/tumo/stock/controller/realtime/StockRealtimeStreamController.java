@@ -2,6 +2,7 @@ package com.tumo.stock.controller.realtime;
 
 import com.tumo.stock.adapter.out.sse.orderbook.StockOrderBookSseEmitterRegistry;
 import com.tumo.stock.adapter.out.sse.price.StockPriceSseEmitterRegistry;
+import com.tumo.stock.service.subscription.StockOrderBookSubscriptionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
@@ -34,6 +35,11 @@ public class StockRealtimeStreamController {
     private final StockOrderBookSseEmitterRegistry stockOrderBookSseEmitterRegistry;
 
     /**
+     * 단일 종목의 KIS 실시간 호가 구독을 시작하는 서비스.
+     */
+    private final StockOrderBookSubscriptionService stockOrderBookSubscriptionService;
+
+    /**
      * 실시간 체결가 SSE stream을 연결한다.
      *
      * @param stockCodes 실시간 체결가 이벤트를 수신할 종목 코드 목록
@@ -54,10 +60,11 @@ public class StockRealtimeStreamController {
      * @return 실시간 호가 이벤트를 수신할 SSE 연결
      */
     @GetMapping(value = "/{stockCode}/realtime/order-book/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    @Operation(summary = "실시간 호가 stream 연결", description = "iOS 클라이언트가 Backend에서 발행하는 특정 종목의 실시간 호가 이벤트를 수신합니다.")
+    @Operation(summary = "실시간 호가 stream 연결", description = "iOS 클라이언트가 특정 종목의 실시간 호가 이벤트를 수신하고, Backend는 해당 종목의 KIS 호가 구독을 시작합니다.")
     public SseEmitter streamRealtimeOrderBook(
             @PathVariable String stockCode
     ) {
+        stockOrderBookSubscriptionService.subscribe(stockCode);
         return stockOrderBookSseEmitterRegistry.connect(stockCode);
     }
 }

@@ -82,6 +82,8 @@ StockRealtimeController
 POST /api/v1/internal/stocks/{stockCode}/realtime/order-book/subscribe
 ```
 
+이 API는 Backend 내부 확인 또는 수동 테스트용이다. iOS 클라이언트는 이 API를 직접 호출하지 않고, 아래의 호가 SSE stream에 연결한다. 호가 SSE stream 연결 시 Backend가 해당 종목의 KIS 호가 구독을 자동으로 시작한다.
+
 동작:
 
 ```text
@@ -130,7 +132,7 @@ event: stock-price
 
 ### 호가 stream
 
-호가는 특정 종목 상세/주문 화면에서 사용하므로 단일 종목 기준으로 연결한다.
+호가는 특정 종목 상세/주문 화면에서 사용하므로 단일 종목 기준으로 연결한다. 이 stream에 연결하면 Backend는 SSE emitter를 등록하기 전에 해당 종목의 KIS 실시간 호가 구독을 시작한다.
 
 ```http
 GET /api/v1/stocks/{stockCode}/realtime/order-book/stream
@@ -155,6 +157,20 @@ Accept: text/event-stream
 
 ```text
 event: stock-order-book
+```
+
+호가 stream 연결 흐름:
+
+```text
+iOS 종목 상세/주문 화면
+→ GET /api/v1/stocks/{stockCode}/realtime/order-book/stream
+→ StockRealtimeStreamController.streamRealtimeOrderBook(stockCode)
+→ StockOrderBookSubscriptionService.subscribe(stockCode)
+→ StockRealtimeOrderBookClient.subscribe(...)
+→ KisRealtimeWebSocketClient
+→ H0STASP0 구독 메시지 전송
+→ StockOrderBookSseEmitterRegistry.connect(stockCode)
+→ iOS가 heartbeat와 stock-order-book 이벤트 수신
 ```
 
 ### Heartbeat
@@ -337,8 +353,9 @@ KIS_APP_SECRET
 1. KIS 환경변수를 설정한다.
 2. `kis.enabled=true`로 Backend를 실행한다.
 3. iOS 또는 curl로 SSE stream을 먼저 연결한다.
-4. 내부 API로 KIS 구독을 시작한다.
-5. SSE stream에서 `stock-price`, `stock-order-book`, `heartbeat` 이벤트를 확인한다.
+4. 체결가는 내부 API로 KIS 구독을 시작한다.
+5. 호가는 종목별 SSE stream 연결 시 KIS 구독이 자동으로 시작되는지 확인한다.
+6. SSE stream에서 `stock-price`, `stock-order-book`, `heartbeat` 이벤트를 확인한다.
 
 예시:
 
@@ -353,6 +370,8 @@ curl -N http://localhost:8080/api/v1/stocks/005930/realtime/order-book/stream
 ```bash
 curl -i -X POST http://localhost:8080/api/v1/internal/stocks/realtime/subscribe
 ```
+
+호가 내부 구독 API는 수동 확인이 필요할 때만 호출한다.
 
 ```bash
 curl -i -X POST http://localhost:8080/api/v1/internal/stocks/005930/realtime/order-book/subscribe

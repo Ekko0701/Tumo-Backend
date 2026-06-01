@@ -108,6 +108,8 @@ POST /api/v1/internal/stocks/realtime/subscribe
 POST /api/v1/internal/stocks/{stockCode}/realtime/order-book/subscribe
 ```
 
+호가 구독은 일반 클라이언트 흐름에서는 `GET /api/v1/stocks/{stockCode}/realtime/order-book/stream` 연결 시 자동으로 시작한다. 위 내부 호가 구독 API는 수동 확인 또는 운영용 트리거에 가깝다.
+
 추후에는 다음과 같은 해제 API를 검토한다.
 
 ```text

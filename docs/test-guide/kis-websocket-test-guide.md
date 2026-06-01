@@ -113,7 +113,7 @@ data: ok
 
 ## 2. SSE 호가 stream 연결
 
-다른 터미널에서 특정 종목의 호가 stream을 연결한다.
+다른 터미널에서 특정 종목의 호가 stream을 연결한다. 이 요청은 단순히 SSE emitter만 등록하는 것이 아니라, Backend가 KIS에 해당 종목의 실시간 호가 구독을 시작하는 트리거이기도 하다.
 
 ```bash
 curl -N \
@@ -126,6 +126,13 @@ curl -N \
 ```text
 event: heartbeat
 data: ok
+```
+
+장중에 KIS 구독과 메시지 파싱이 정상 동작하면 같은 터미널에 다음 이벤트가 이어서 들어온다.
+
+```text
+event: stock-order-book
+data: {...}
 ```
 
 ## 3. KIS 실시간 체결가 구독 시작
@@ -150,9 +157,9 @@ event: stock-price
 data: {...}
 ```
 
-## 4. KIS 실시간 호가 구독 시작
+## 4. KIS 실시간 호가 수동 구독 확인
 
-Backend가 KIS에서 특정 종목의 실시간 호가를 받기 시작하도록 내부 API를 호출한다.
+호가는 `GET /api/v1/stocks/{stockCode}/realtime/order-book/stream` 연결 시 자동으로 KIS 구독을 시작한다. 아래 내부 API는 stream 없이 Backend의 KIS 호가 구독만 별도로 확인해야 할 때 사용하는 수동 테스트용이다.
 
 ```bash
 curl -i -X POST \
@@ -165,7 +172,7 @@ curl -i -X POST \
 HTTP/1.1 204
 ```
 
-호가 stream 터미널에서 기대하는 이벤트:
+이미 호가 stream이 연결되어 있다면 기대하는 이벤트:
 
 ```text
 event: stock-order-book
@@ -196,7 +203,8 @@ curl -s \
 - KIS approval key 발급이 실패하지 않는다.
 - KIS WebSocket 연결이 실패하지 않는다.
 - 체결가 구독 API가 `204 No Content`를 반환한다.
-- 호가 구독 API가 `204 No Content`를 반환한다.
+- 호가 SSE stream 연결 시 Backend가 해당 종목의 KIS 호가 구독을 시작한다.
+- 수동 호가 구독 API를 별도로 호출했다면 `204 No Content`를 반환한다.
 - 가격 SSE stream에서 `heartbeat` 이벤트가 보인다.
 - 호가 SSE stream에서 `heartbeat` 이벤트가 보인다.
 - 장중에는 가격 SSE stream에서 `stock-price` 이벤트가 보인다.
