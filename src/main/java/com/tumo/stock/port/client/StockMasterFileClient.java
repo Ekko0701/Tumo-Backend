@@ -1,5 +1,6 @@
 package com.tumo.stock.port.client;
 
+import com.tumo.stock.service.master.StockMasterFile;
 import java.util.List;
 
 /**

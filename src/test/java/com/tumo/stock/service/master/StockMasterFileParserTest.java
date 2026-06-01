@@ -3,7 +3,6 @@ package com.tumo.stock.service.master;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.tumo.stock.domain.stock.Market;
-import com.tumo.stock.port.client.StockMasterFile;
 import java.nio.charset.Charset;
 import org.junit.jupiter.api.Test;
 

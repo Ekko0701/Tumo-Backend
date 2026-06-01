@@ -1,4 +1,4 @@
-package com.tumo.stock.port.client;
+package com.tumo.stock.service.master;
 
 import com.tumo.stock.domain.stock.Market;
 import java.util.Objects;

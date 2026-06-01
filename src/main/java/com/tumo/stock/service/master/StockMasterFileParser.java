@@ -1,7 +1,6 @@
 package com.tumo.stock.service.master;
 
 import com.tumo.stock.domain.stock.Market;
-import com.tumo.stock.port.client.StockMasterFile;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

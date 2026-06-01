@@ -1,8 +1,8 @@
 package com.tumo.stock.adapter.out.kis.rest.master;
 
 import com.tumo.stock.domain.stock.Market;
-import com.tumo.stock.port.client.StockMasterFile;
 import com.tumo.stock.port.client.StockMasterFileClient;
+import com.tumo.stock.service.master.StockMasterFile;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;

@@ -2,7 +2,6 @@ package com.tumo.stock.service.master;
 
 import com.tumo.stock.domain.stock.Stock;
 import com.tumo.stock.dto.StockMasterImportResponse;
-import com.tumo.stock.port.client.StockMasterFile;
 import com.tumo.stock.port.client.StockMasterFileClient;
 import com.tumo.stock.repository.StockRepository;
 import java.time.LocalDateTime;
