@@ -1,8 +1,10 @@
 package com.tumo.stock.controller;
 
+import com.tumo.stock.domain.ranking.StockRankingType;
 import com.tumo.stock.domain.stock.Market;
 import com.tumo.stock.dto.StockPageResponse;
 import com.tumo.stock.dto.StockResponse;
+import com.tumo.stock.service.ranking.StockRankingService;
 import com.tumo.stock.service.query.StockService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class StockController {
 
     private final StockService stockService;
+    private final StockRankingService stockRankingService;
 
     @GetMapping
     @Operation(summary = "종목 목록 조회", description = "시장별 종목 목록을 page 단위로 조회합니다.")
@@ -29,6 +32,17 @@ public class StockController {
             @RequestParam(defaultValue = "30") int size
     ) {
         return stockService.getStocks(market, page, size);
+    }
+
+    @GetMapping("/rankings")
+    @Operation(summary = "종목 랭킹 목록 조회", description = "시장과 랭킹 기준에 해당하는 종목 목록을 page 단위로 조회합니다.")
+    public StockPageResponse getStockRankings(
+            @RequestParam Market market,
+            @RequestParam StockRankingType type,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "30") int size
+    ) {
+        return stockRankingService.getRankings(market, type, page, size);
     }
 
     @GetMapping("/{stockCode}")

@@ -63,6 +63,15 @@ public enum ErrorCode {
     ),
 
     /**
+     * 요청한 종목 랭킹 기준을 아직 지원하지 않는 경우.
+     */
+    STOCK_RANKING_NOT_SUPPORTED(
+            HttpStatus.NOT_IMPLEMENTED,
+            "STOCK_RANKING_NOT_SUPPORTED",
+            "지원하지 않는 종목 랭킹 타입입니다."
+    ),
+
+    /**
      * 서버 내부에서 예상하지 못한 오류가 발생한 경우.
      */
     INTERNAL_SERVER_ERROR(
