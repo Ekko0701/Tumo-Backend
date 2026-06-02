@@ -10,6 +10,7 @@ import com.tumo.stock.dto.StockResponse;
 import com.tumo.stock.port.query.StockPriceQueryPort;
 import com.tumo.stock.repository.StockRepository;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -38,11 +39,9 @@ public class StockService {
         Page<Stock> stockPage = stockRepository.findByMarket(market, pageRequest);
         List<Stock> stocks = stockPage.getContent();
 
-        stocks.forEach(this::refreshCurrentPrice);
-
         return new StockPageResponse(
                 stocks.stream()
-                        .map(StockResponse::from)
+                        .map(stock -> StockResponse.from(stock, refreshCurrentPrice(stock).orElse(null)))
                         .toList(),
                 stockPage.getNumber(),
                 stockPage.getSize(),
@@ -55,17 +54,19 @@ public class StockService {
         Stock stock = stockRepository.findByStockCode(stockCode)
                 .orElseThrow(() -> new BusinessException(ErrorCode.STOCK_NOT_FOUND));
 
-        refreshCurrentPrice(stock);
+        Optional<StockPrice> stockPrice = refreshCurrentPrice(stock);
 
-        return StockResponse.from(stock);
+        return StockResponse.from(stock, stockPrice.orElse(null));
     }
 
-    private void refreshCurrentPrice(Stock stock) {
+    private Optional<StockPrice> refreshCurrentPrice(Stock stock) {
         try {
-            stockPriceQueryPort.findCurrentPrice(stock.getStockCode())
-                    .ifPresent(stockPrice -> updateStockPrice(stock, stockPrice));
+            Optional<StockPrice> stockPrice = stockPriceQueryPort.findCurrentPrice(stock.getStockCode());
+            stockPrice.ifPresent(price -> updateStockPrice(stock, price));
+            return stockPrice;
         } catch (RuntimeException exception) {
             log.warn("종목 현재가 조회에 실패했습니다. stockCode={}", stock.getStockCode(), exception);
+            return Optional.empty();
         }
     }
 

@@ -1,4 +1,4 @@
-package com.tumo.stock.adapter.out.kis.rest.quotation;
+package com.tumo.stock.adapter.out.kis.rest.price;
 
 import com.tumo.stock.adapter.out.kis.rest.client.KisRestClient;
 import com.tumo.stock.domain.price.StockPrice;

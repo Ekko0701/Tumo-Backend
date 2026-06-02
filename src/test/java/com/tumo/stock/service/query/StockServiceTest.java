@@ -57,6 +57,7 @@ class StockServiceTest {
                         5000L,
                         BigDecimal.valueOf(6.67),
                         1000000L,
+                        80000000000L,
                         refreshedAt
                 )));
         given(stockPriceQueryPort.findCurrentPrice("000660"))
@@ -66,6 +67,7 @@ class StockServiceTest {
                         10000L,
                         BigDecimal.valueOf(5.56),
                         500000L,
+                        95000000000L,
                         refreshedAt
                 )));
 
@@ -81,6 +83,18 @@ class StockServiceTest {
         assertThat(response.stocks())
                 .extracting(StockResponse::currentPrice)
                 .containsExactly(80000L, 190000L);
+        assertThat(response.stocks())
+                .extracting(StockResponse::changePrice)
+                .containsExactly(5000L, 10000L);
+        assertThat(response.stocks())
+                .extracting(StockResponse::changeRate)
+                .containsExactly(BigDecimal.valueOf(6.67), BigDecimal.valueOf(5.56));
+        assertThat(response.stocks())
+                .extracting(StockResponse::tradeVolume)
+                .containsExactly(1000000L, 500000L);
+        assertThat(response.stocks())
+                .extracting(StockResponse::tradeAmount)
+                .containsExactly(80000000000L, 95000000000L);
         assertThat(samsung.getCurrentPrice()).isEqualTo(80000L);
         assertThat(samsung.getPriceChangedAt()).isEqualTo(refreshedAt);
         assertThat(skHynix.getCurrentPrice()).isEqualTo(190000L);
@@ -117,6 +131,10 @@ class StockServiceTest {
 
         assertThat(response.stocks()).hasSize(1);
         assertThat(response.stocks().getFirst().currentPrice()).isEqualTo(75000L);
+        assertThat(response.stocks().getFirst().changePrice()).isNull();
+        assertThat(response.stocks().getFirst().changeRate()).isNull();
+        assertThat(response.stocks().getFirst().tradeVolume()).isNull();
+        assertThat(response.stocks().getFirst().tradeAmount()).isNull();
         assertThat(response.stocks().getFirst().priceChangedAt()).isEqualTo(priceChangedAt);
         assertThat(samsung.getCurrentPrice()).isEqualTo(75000L);
         assertThat(samsung.getPriceChangedAt()).isEqualTo(priceChangedAt);
@@ -134,6 +152,10 @@ class StockServiceTest {
 
         assertThat(response.stocks()).hasSize(1);
         assertThat(response.stocks().getFirst().currentPrice()).isEqualTo(75000L);
+        assertThat(response.stocks().getFirst().changePrice()).isNull();
+        assertThat(response.stocks().getFirst().changeRate()).isNull();
+        assertThat(response.stocks().getFirst().tradeVolume()).isNull();
+        assertThat(response.stocks().getFirst().tradeAmount()).isNull();
         assertThat(response.stocks().getFirst().priceChangedAt()).isEqualTo(priceChangedAt);
         assertThat(samsung.getCurrentPrice()).isEqualTo(75000L);
         assertThat(samsung.getPriceChangedAt()).isEqualTo(priceChangedAt);
@@ -152,6 +174,7 @@ class StockServiceTest {
                         5000L,
                         BigDecimal.valueOf(6.67),
                         1000000L,
+                        80000000000L,
                         refreshedAt
                 )));
 
@@ -161,6 +184,10 @@ class StockServiceTest {
         assertThat(response.stockName()).isEqualTo("삼성전자");
         assertThat(response.market()).isEqualTo("KOSPI");
         assertThat(response.currentPrice()).isEqualTo(80000L);
+        assertThat(response.changePrice()).isEqualTo(5000L);
+        assertThat(response.changeRate()).isEqualByComparingTo("6.67");
+        assertThat(response.tradeVolume()).isEqualTo(1000000L);
+        assertThat(response.tradeAmount()).isEqualTo(80000000000L);
         assertThat(response.priceChangedAt()).isEqualTo(refreshedAt);
         assertThat(stock.getCurrentPrice()).isEqualTo(80000L);
         assertThat(stock.getPriceChangedAt()).isEqualTo(refreshedAt);
@@ -177,6 +204,10 @@ class StockServiceTest {
 
         assertThat(response.stockCode()).isEqualTo("005930");
         assertThat(response.currentPrice()).isEqualTo(75000L);
+        assertThat(response.changePrice()).isNull();
+        assertThat(response.changeRate()).isNull();
+        assertThat(response.tradeVolume()).isNull();
+        assertThat(response.tradeAmount()).isNull();
         assertThat(response.priceChangedAt()).isEqualTo(priceChangedAt);
         assertThat(stock.getCurrentPrice()).isEqualTo(75000L);
         assertThat(stock.getPriceChangedAt()).isEqualTo(priceChangedAt);

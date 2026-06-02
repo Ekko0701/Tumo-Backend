@@ -1,4 +1,4 @@
-package com.tumo.stock.adapter.out.kis.rest.quotation;
+package com.tumo.stock.adapter.out.kis.rest.price;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -19,6 +19,7 @@ class KisInquirePriceResponseTest {
                         "100",
                         "0.13",
                         "1234567",
+                        "92592592500",
                         "20260529",
                         "093000"
                 )
@@ -31,6 +32,7 @@ class KisInquirePriceResponseTest {
         assertThat(stockPrice.changePrice()).isEqualTo(100L);
         assertThat(stockPrice.changeRate()).isEqualByComparingTo("0.13");
         assertThat(stockPrice.tradeVolume()).isEqualTo(1234567L);
+        assertThat(stockPrice.tradeAmount()).isEqualTo(92592592500L);
         assertThat(stockPrice.priceChangedAt()).isEqualTo("2026-05-29T09:30:00");
     }
 

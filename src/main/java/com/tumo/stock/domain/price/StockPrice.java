@@ -12,6 +12,7 @@ import java.util.Objects;
  * @param changePrice 전일 대비 가격 변화량
  * @param changeRate 전일 대비 가격 변화율
  * @param tradeVolume 누적 거래량
+ * @param tradeAmount 누적 거래대금
  * @param priceChangedAt 가격 변경 시각
  */
 public record StockPrice(
@@ -20,6 +21,7 @@ public record StockPrice(
         Long changePrice,
         BigDecimal changeRate,
         Long tradeVolume,
+        Long tradeAmount,
         LocalDateTime priceChangedAt
 ) {
 
@@ -36,5 +38,27 @@ public record StockPrice(
         if (tradeVolume != null && tradeVolume < 0) {
             throw new IllegalArgumentException("거래량은 0 이상이어야 합니다.");
         }
+        if (tradeAmount != null && tradeAmount < 0) {
+            throw new IllegalArgumentException("거래대금은 0 이상이어야 합니다.");
+        }
+    }
+
+    public StockPrice(
+            String stockCode,
+            Long currentPrice,
+            Long changePrice,
+            BigDecimal changeRate,
+            Long tradeVolume,
+            LocalDateTime priceChangedAt
+    ) {
+        this(
+                stockCode,
+                currentPrice,
+                changePrice,
+                changeRate,
+                tradeVolume,
+                null,
+                priceChangedAt
+        );
     }
 }

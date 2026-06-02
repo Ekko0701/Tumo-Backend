@@ -1,4 +1,4 @@
-package com.tumo.stock.adapter.out.kis.rest.quotation;
+package com.tumo.stock.adapter.out.kis.rest.price;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

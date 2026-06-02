@@ -1,4 +1,4 @@
-package com.tumo.stock.adapter.out.kis.rest.quotation;
+package com.tumo.stock.adapter.out.kis.rest.price;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -51,6 +51,7 @@ class KisStockPriceQueryClientTest {
                         "100",
                         "0.13",
                         "1234567",
+                        "92592592500",
                         "20260529",
                         "093000"
                 )

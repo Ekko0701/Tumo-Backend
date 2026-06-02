@@ -19,6 +19,7 @@ class StockPriceTest {
                 100L,
                 BigDecimal.valueOf(0.13),
                 1234567L,
+                92592592500L,
                 priceChangedAt
         );
 
@@ -27,6 +28,7 @@ class StockPriceTest {
         assertThat(stockPrice.changePrice()).isEqualTo(100L);
         assertThat(stockPrice.changeRate()).isEqualByComparingTo("0.13");
         assertThat(stockPrice.tradeVolume()).isEqualTo(1234567L);
+        assertThat(stockPrice.tradeAmount()).isEqualTo(92592592500L);
         assertThat(stockPrice.priceChangedAt()).isEqualTo(priceChangedAt);
     }
 
@@ -70,5 +72,20 @@ class StockPriceTest {
         ))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("거래량은 0 이상이어야 합니다.");
+    }
+
+    @Test
+    void throwsExceptionWhenTradeAmountIsNegative() {
+        assertThatThrownBy(() -> new StockPrice(
+                "005930",
+                75100L,
+                100L,
+                BigDecimal.valueOf(0.13),
+                1234567L,
+                -1L,
+                LocalDateTime.of(2026, 5, 24, 9, 1)
+        ))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("거래대금은 0 이상이어야 합니다.");
     }
 }

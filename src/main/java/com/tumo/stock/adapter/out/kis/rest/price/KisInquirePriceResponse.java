@@ -1,4 +1,4 @@
-package com.tumo.stock.adapter.out.kis.rest.quotation;
+package com.tumo.stock.adapter.out.kis.rest.price;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.tumo.stock.domain.price.StockPrice;
@@ -61,6 +61,7 @@ record KisInquirePriceResponse(
      * @param changePrice 전일 대비 가격 변화량
      * @param changeRate 전일 대비 가격 변화율
      * @param tradeVolume 누적 거래량
+     * @param tradeAmount 누적 거래대금
      * @param businessDate 영업 일자
      * @param tradeTime 체결 시각
      */
@@ -76,6 +77,9 @@ record KisInquirePriceResponse(
 
             @JsonProperty("acml_vol")
             String tradeVolume,
+
+            @JsonProperty("acml_tr_pbmn")
+            String tradeAmount,
 
             @JsonProperty("stck_bsop_date")
             String businessDate,
@@ -102,6 +106,7 @@ record KisInquirePriceResponse(
                     parseLong(changePrice),
                     parseBigDecimal(changeRate),
                     parseLong(tradeVolume),
+                    parseLong(tradeAmount),
                     parsePriceChangedAt()
             );
         }
