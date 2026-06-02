@@ -42,7 +42,6 @@ Access Token 재발급
 ```text
 종목 목록 조회
 종목 상세 조회
-개발용 seed 종목 데이터
 ```
 
 ### Order
