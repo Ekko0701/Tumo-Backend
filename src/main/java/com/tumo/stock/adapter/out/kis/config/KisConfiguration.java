@@ -3,6 +3,7 @@ package com.tumo.stock.adapter.out.kis.config;
 import com.tumo.stock.adapter.out.kis.rest.auth.KisAccessTokenClient;
 import com.tumo.stock.adapter.out.kis.websocket.auth.KisApprovalKeyClient;
 import com.tumo.stock.adapter.out.kis.rest.price.KisStockPriceQueryClient;
+import com.tumo.stock.adapter.out.kis.rest.ranking.KisStockRankingQueryClient;
 import com.tumo.stock.adapter.out.kis.rest.client.KisRestClient;
 import com.tumo.stock.adapter.out.kis.websocket.client.KisRealtimeWebSocketClient;
 import com.tumo.stock.adapter.out.kis.websocket.dispatcher.KisWebSocketMessageDispatcher;
@@ -66,6 +67,18 @@ public class KisConfiguration {
     @ConditionalOnProperty(prefix = "kis", name = "enabled", havingValue = "true")
     KisStockPriceQueryClient kisStockPriceQueryClient(KisRestClient kisRestClient) {
         return new KisStockPriceQueryClient(kisRestClient);
+    }
+
+    /**
+     * KIS REST API 기반 종목 랭킹 조회 client bean을 생성한다.
+     *
+     * @param kisRestClient KIS REST API 공통 client
+     * @return KIS REST API 기반 종목 랭킹 조회 client
+     */
+    @Bean
+    @ConditionalOnProperty(prefix = "kis", name = "enabled", havingValue = "true")
+    KisStockRankingQueryClient kisStockRankingQueryClient(KisRestClient kisRestClient) {
+        return new KisStockRankingQueryClient(kisRestClient);
     }
 
     /**

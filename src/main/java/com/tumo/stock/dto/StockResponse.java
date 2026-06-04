@@ -1,6 +1,7 @@
 package com.tumo.stock.dto;
 
 import com.tumo.stock.domain.price.StockPrice;
+import com.tumo.stock.domain.ranking.StockRanking;
 import com.tumo.stock.domain.stock.Stock;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
@@ -85,6 +86,20 @@ public record StockResponse(
                 stockPrice.tradeVolume(),
                 stockPrice.tradeAmount(),
                 stockPrice.priceChangedAt()
+        );
+    }
+
+    public static StockResponse from(StockRanking stockRanking) {
+        return new StockResponse(
+                stockRanking.stockCode(),
+                stockRanking.stockName(),
+                stockRanking.market().name(),
+                stockRanking.currentPrice(),
+                stockRanking.changePrice(),
+                stockRanking.changeRate(),
+                stockRanking.tradeVolume(),
+                stockRanking.tradeAmount(),
+                stockRanking.rankedAt()
         );
     }
 }
