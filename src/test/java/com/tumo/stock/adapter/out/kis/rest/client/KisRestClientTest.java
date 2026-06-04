@@ -41,6 +41,7 @@ class KisRestClientTest {
                 .andExpect(header("appkey", "test-app-key"))
                 .andExpect(header("appsecret", "test-app-secret"))
                 .andExpect(header("tr_id", "FHKST01010100"))
+                .andExpect(header("custtype", "P"))
                 .andRespond(withSuccess("""
                         {
                           "rt_cd": "0",

@@ -27,6 +27,11 @@ public class KisRestClient {
     private static final String TRANSACTION_ID_HEADER = "tr_id";
 
     /**
+     * KIS REST API 고객 타입 header 이름.
+     */
+    private static final String CUSTOMER_TYPE_HEADER = "custtype";
+
+    /**
      * Bearer 인증 scheme.
      */
     private static final String BEARER_PREFIX = "Bearer ";
@@ -91,5 +96,6 @@ public class KisRestClient {
         headers.set(APP_KEY_HEADER, properties.appKey());
         headers.set(APP_SECRET_HEADER, properties.appSecret());
         headers.set(TRANSACTION_ID_HEADER, transactionId);
+        headers.set(CUSTOMER_TYPE_HEADER, properties.customerType());
     }
 }
