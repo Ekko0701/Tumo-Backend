@@ -132,7 +132,7 @@ public class KisWebSocketSessionManager {
         @Override
         public CompletionStage<?> onText(WebSocket webSocket, CharSequence data, boolean last) {
             log.debug("KIS WebSocket 메시지를 수신했습니다.");
-            handleText(data, last);
+            handleText(webSocket, data, last);
             webSocket.request(1);
             return WebSocket.Listener.super.onText(webSocket, data, last);
         }
@@ -154,10 +154,15 @@ public class KisWebSocketSessionManager {
         /**
          * 수신한 text frame을 완성된 raw message로 만든 뒤 callback에 전달한다.
          *
+         * <p>KIS WebSocket은 연결 유지를 위해 주기적으로 PINGPONG 메시지를 보낸다.
+         * 클라이언트가 받은 PINGPONG 메시지를 그대로 되돌려보내지 않으면 KIS가 연결을 끊으므로,
+         * PINGPONG 메시지는 callback으로 전달하지 않고 즉시 echo 한다.</p>
+         *
+         * @param webSocket PINGPONG echo를 보낼 KIS WebSocket 연결
          * @param data 수신한 text frame
          * @param last 현재 frame이 메시지의 마지막 frame인지 여부
          */
-        private void handleText(CharSequence data, boolean last) {
+        private void handleText(WebSocket webSocket, CharSequence data, boolean last) {
             textBuffer.append(data);
 
             if (!last) {
@@ -167,11 +172,29 @@ public class KisWebSocketSessionManager {
             String rawMessage = textBuffer.toString();
             textBuffer.setLength(0);
 
+            log.debug("KIS WebSocket 수신 원본 메시지: {}", rawMessage);
+
+            if (isPingPong(rawMessage)) {
+                log.debug("KIS WebSocket PINGPONG 메시지를 echo 합니다. message={}", rawMessage);
+                webSocket.sendText(rawMessage, true);
+                return;
+            }
+
             try {
                 messageHandler.accept(rawMessage);
             } catch (RuntimeException exception) {
                 log.warn("KIS WebSocket 수신 메시지 callback 처리에 실패했습니다.", exception);
             }
+        }
+
+        /**
+         * 수신한 메시지가 KIS WebSocket 연결 유지용 PINGPONG 메시지인지 확인한다.
+         *
+         * @param rawMessage KIS WebSocket에서 수신한 원본 메시지
+         * @return PINGPONG 메시지이면 true
+         */
+        private boolean isPingPong(String rawMessage) {
+            return rawMessage.contains("PINGPONG");
         }
     }
 }
