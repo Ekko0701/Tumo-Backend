@@ -25,7 +25,7 @@ jwt:
   refresh-token-expiration-millis: 1209600000
 
 kis:
-  enabled: false
+  enabled: ${KIS_ENABLED:true}
   app-key: ${KIS_APP_KEY:}
   app-secret: ${KIS_APP_SECRET:}
   rest-url: ${KIS_REST_URL:https://openapi.koreainvestment.com:9443}
@@ -34,3 +34,7 @@ kis:
   customer-type: ${KIS_CUSTOMER_TYPE:P}
   trade-price-tr-id: ${KIS_TRADE_PRICE_TR_ID:H0STCNT0}
   order-book-tr-id: ${KIS_ORDER_BOOK_TR_ID:H0STASP0}
+
+logging:
+  level:
+    com.tumo.stock.adapter.out.kis: DEBUG
