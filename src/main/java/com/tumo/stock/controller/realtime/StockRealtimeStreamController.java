@@ -3,6 +3,7 @@ package com.tumo.stock.controller.realtime;
 import com.tumo.stock.adapter.out.sse.orderbook.StockOrderBookSseEmitterRegistry;
 import com.tumo.stock.adapter.out.sse.price.StockPriceSseEmitterRegistry;
 import com.tumo.stock.service.subscription.StockOrderBookSubscriptionService;
+import com.tumo.stock.service.subscription.StockPriceSubscriptionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
@@ -40,6 +41,11 @@ public class StockRealtimeStreamController {
     private final StockOrderBookSubscriptionService stockOrderBookSubscriptionService;
 
     /**
+     * 지정 종목의 KIS 실시간 체결가 구독을 시작하는 서비스.
+     */
+    private final StockPriceSubscriptionService stockPriceSubscriptionService;
+
+    /**
      * 실시간 체결가 SSE stream을 연결한다.
      *
      * @param stockCodes 실시간 체결가 이벤트를 수신할 종목 코드 목록
@@ -50,6 +56,7 @@ public class StockRealtimeStreamController {
     public SseEmitter streamRealtimePrices(
             @RequestParam(required = false) List<String> stockCodes
     ) {
+        stockPriceSubscriptionService.subscribe(stockCodes);
         return stockPriceSseEmitterRegistry.connect(stockCodes);
     }
 
