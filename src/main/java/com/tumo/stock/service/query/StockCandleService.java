@@ -81,10 +81,27 @@ public class StockCandleService {
     }
 
     /**
-     * KIS 재조회 시작 일자를 결정한다. 저장된 최신 봉이 조회 시작일 이후면 그 봉부터 다시 받아 미완성 봉을 갱신하고,
-     * 그렇지 않으면 조회 시작일부터 전체를 받는다.
+     * KIS 재조회 시작 일자를 결정한다.
+     *
+     * <p>저장된 가장 이른 봉이 조회 시작일({@code from})을 덮지 못하면(앞쪽에 구멍이 있거나 저장 데이터가 없으면)
+     * {@code from}부터 전체 구간을 다시 받아 구멍을 메운다. 앞쪽이 이미 채워져 있으면, 저장된 최신 봉부터만 다시 받아
+     * 미완성 최신 봉을 갱신한다.</p>
+     *
+     * <p>주의: 앞쪽이 채워진 상태에서 중간에 끊긴 구간(서로 떨어진 저장 구간)은 이 방식으로 메워지지 않는다.
+     * 차트 UI처럼 범위를 이어서 넓혀 보는 접근 패턴에서는 발생하지 않지만, 분리된 구간을 따로 조회하는 경우라면
+     * 전체 구간 재조회로 전환해야 한다.</p>
      */
     private LocalDate resolveFetchStart(String stockCode, CandleInterval interval, LocalDate from) {
+        boolean frontCovered = stockCandleRepository
+                .findTopByStockCodeAndIntervalOrderByCandleTimeAsc(stockCode, interval)
+                .map(earliest -> earliest.getCandleTime().toLocalDate())
+                .map(earliestDate -> !earliestDate.isAfter(from))
+                .orElse(false);
+
+        if (!frontCovered) {
+            return from;
+        }
+
         return stockCandleRepository.findTopByStockCodeAndIntervalOrderByCandleTimeDesc(stockCode, interval)
                 .map(latest -> latest.getCandleTime().toLocalDate())
                 .filter(latestDate -> latestDate.isAfter(from))

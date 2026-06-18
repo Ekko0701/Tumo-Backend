@@ -31,6 +31,14 @@ public interface StockCandleRepository extends JpaRepository<StockCandle, Long> 
     );
 
     /**
+     * 종목·시간 단위의 가장 이른 저장 캔들을 조회한다. 조회 시작 구간이 이미 채워져 있는지 판단하는 데 사용한다.
+     */
+    Optional<StockCandle> findTopByStockCodeAndIntervalOrderByCandleTimeAsc(
+            String stockCode,
+            CandleInterval interval
+    );
+
+    /**
      * 종목·시간 단위·기준 시각의 캔들이 이미 저장돼 있는지 확인한다. upsert 시 중복 방지에 사용한다.
      */
     boolean existsByStockCodeAndIntervalAndCandleTime(

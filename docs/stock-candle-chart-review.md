@@ -161,9 +161,11 @@ flowchart LR
 - **파싱 격리 + 테스트**: KIS 필드 매핑이 응답 record에 격리되고 단위 테스트가 있어, 실제 필드명이 달라도 그 파일만 고치면 됨.
 - **무한 루프 방지**: 페이지네이션에 `MAX_PAGES` 상한.
 
-### 🔴 HIGH — 캐시 "중간 구멍"은 채워지지 않는 버그
+### ✅ HIGH (수정 완료) — 캐시 "중간 구멍"은 채워지지 않는 버그
 
-`resolveFetchStart()`는 **"저장된 가장 최근 봉"** 하나만 보고 거기서부터 다시 받습니다. 그래서 **DB에 저장된 데이터가 앞쪽부터 연속적이라고 암묵적으로 가정**합니다. 만약 중간이나 앞쪽이 비어 있으면 영영 안 채워집니다.
+> **상태:** 커밋 `e038432` 이후 후속 커밋에서 수정됨. 아래는 원래 문제와 적용한 수정 내용.
+
+`resolveFetchStart()`는 **"저장된 가장 최근 봉"** 하나만 보고 거기서부터 다시 받았습니다. 그래서 **DB에 저장된 데이터가 앞쪽부터 연속적이라고 암묵적으로 가정**합니다. 만약 중간이나 앞쪽이 비어 있으면 영영 안 채워집니다.
 
 **재현 시나리오:**
 
@@ -179,20 +181,28 @@ flowchart TD
 
 즉, 사용자가 **좁은 범위를 먼저 본 뒤 넓은 범위를 보면** 앞부분이 비어서 나옵니다.
 
-**개선 방향 (택1):**
-1. **가장 단순**: DB의 `[from, to]` 캔들 개수/최소·최대 시각을 확인해, **요청 범위를 완전히 덮지 못하면 `from`부터 다시 받기**.
-2. **정확**: 저장된 캔들의 "예상 거래일 집합"과 비교해 빠진 구간만 골라 받기(복잡, 휴장일 캘린더 필요).
-
-MVP라면 1번을 권장합니다. 예: 저장된 최소 봉 날짜 `earliest`가 `from`보다 늦으면 `fetchFrom = from`으로 내려서 앞쪽 구멍을 메웁니다.
+**적용한 수정:** 위 1번(가장 단순) 방향. `StockCandleRepository`에 `findTopByStockCodeAndIntervalOrderByCandleTimeAsc`(가장 이른 봉)를 추가하고, `resolveFetchStart`가 **저장된 가장 이른 봉이 `from`을 덮는지(앞쪽 커버 여부)** 를 먼저 판정하도록 바꿨습니다.
 
 ```java
-// 개선 스케치 (개념)
-LocalDate earliest = repo.findTop...OrderByCandleTimeAsc(...).map(앞쪽 날짜).orElse(null);
-boolean coversStart = earliest != null && !earliest.isAfter(from);
-LocalDate fetchFrom = coversStart
-        ? latestStoredDate          // 앞쪽이 채워져 있으면 꼬리만 갱신
-        : from;                     // 앞쪽에 구멍이 있으면 처음부터
+private LocalDate resolveFetchStart(String stockCode, CandleInterval interval, LocalDate from) {
+    boolean frontCovered = stockCandleRepository
+            .findTopByStockCodeAndIntervalOrderByCandleTimeAsc(stockCode, interval)
+            .map(earliest -> earliest.getCandleTime().toLocalDate())
+            .map(earliestDate -> !earliestDate.isAfter(from))   // earliest <= from
+            .orElse(false);
+
+    if (!frontCovered) {
+        return from;        // 앞쪽에 구멍(또는 저장 없음) → from부터 전체 재조회
+    }
+    return stockCandleRepository.findTopByStockCodeAndIntervalOrderByCandleTimeDesc(stockCode, interval)
+            .map(latest -> latest.getCandleTime().toLocalDate())
+            .filter(latestDate -> latestDate.isAfter(from))      // 앞쪽 커버 시 꼬리만 갱신
+            .orElse(from);
+}
 ```
+
+- 회귀 테스트 `StockCandleServiceTest.refetchesFromStartWhenStoredFrontHasGap()` 추가 — 1/20부터만 저장된 상태에서 1/1~1/31 요청 시 `from(1/1)`부터 재조회하는지 검증.
+- **잔여 한계(문서화됨):** 앞쪽이 채워진 상태에서 **서로 떨어진 저장 구간(중간 섬)**이 생기면 그 사이 구멍은 여전히 안 메워집니다. 차트 UI처럼 범위를 이어서 넓혀 보는 패턴에선 발생하지 않으며, 분리 구간을 따로 조회하는 케이스가 필요해지면 "요청 범위 전체 재조회"로 전환해야 합니다.
 
 ### 🟠 MEDIUM — 분봉의 무제한 기간 = KIS 폭탄
 
@@ -227,7 +237,7 @@ flowchart LR
 
 ```mermaid
 flowchart TD
-    P1["🔴 1. 중간 구멍 버그 수정<br/>(resolveFetchStart 보완)"] --> P2["🟠 2. 분봉 기간 상한 검증"]
+    P1["✅ 1. 중간 구멍 버그 수정<br/>(resolveFetchStart 보완) — 완료"] --> P2["🟠 2. 분봉 기간 상한 검증"]
     P2 --> P3["🟠 3. 데드 코드 삭제<br/>(existsBy...)"]
     P3 --> P4["🟡 4. 타임존/인증/KIS 필드 확정"]
     P4 --> P5["✅ 5. 실연동 e2e 검증<br/>(실제 KIS 키로)"]
@@ -237,7 +247,7 @@ flowchart TD
 
 ## 7. 최종 체크리스트
 
-- [ ] **(필수)** 좁은 범위 → 넓은 범위 요청 시 앞부분이 채워지는지 검증 (HIGH 버그)
+- [x] **(필수)** 좁은 범위 → 넓은 범위 요청 시 앞부분이 채워지는지 검증 (HIGH 버그) — 수정 + 회귀 테스트 완료
 - [ ] **(필수)** 분봉 장기간 요청 시 KIS 호출 폭증 방지 가드
 - [ ] 사용하지 않는 `existsBy...` 메서드 제거
 - [ ] 서버 타임존이 KST인지 확인 (분봉 "오늘" 판정)

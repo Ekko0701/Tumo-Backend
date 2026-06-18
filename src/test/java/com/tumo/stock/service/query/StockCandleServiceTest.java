@@ -51,7 +51,7 @@ class StockCandleServiceTest {
     @Test
     void fetchesPersistsAndReturnsFromDb() {
         StockCandle fetched = candle(LocalDate.of(2025, 1, 2));
-        given(stockCandleRepository.findTopByStockCodeAndIntervalOrderByCandleTimeDesc(STOCK_CODE, CandleInterval.DAY))
+        given(stockCandleRepository.findTopByStockCodeAndIntervalOrderByCandleTimeAsc(STOCK_CODE, CandleInterval.DAY))
                 .willReturn(Optional.empty());
         given(stockCandleQueryPort.findCandles(STOCK_CODE, CandleInterval.DAY, FROM, TO))
                 .willReturn(List.of(fetched));
@@ -71,6 +71,8 @@ class StockCandleServiceTest {
     @Test
     void refetchesTailFromLatestStoredDate() {
         StockCandle latest = candle(LocalDate.of(2025, 1, 20));
+        given(stockCandleRepository.findTopByStockCodeAndIntervalOrderByCandleTimeAsc(STOCK_CODE, CandleInterval.DAY))
+                .willReturn(Optional.of(candle(FROM)));
         given(stockCandleRepository.findTopByStockCodeAndIntervalOrderByCandleTimeDesc(STOCK_CODE, CandleInterval.DAY))
                 .willReturn(Optional.of(latest));
         given(stockCandleQueryPort.findCandles(eq(STOCK_CODE), eq(CandleInterval.DAY), any(LocalDate.class), eq(TO)))
@@ -87,9 +89,29 @@ class StockCandleServiceTest {
     }
 
     @Test
+    void refetchesFromStartWhenStoredFrontHasGap() {
+        // 저장 데이터가 1/20부터만 있는 상태(앞쪽 1/1~1/19 미보유)에서 1/1~1/31을 요청하면
+        // 최신 봉(1/20)이 아니라 from(1/1)부터 다시 받아 앞쪽 구멍을 메워야 한다.
+        StockCandle laterOnly = candle(LocalDate.of(2025, 1, 20));
+        given(stockCandleRepository.findTopByStockCodeAndIntervalOrderByCandleTimeAsc(STOCK_CODE, CandleInterval.DAY))
+                .willReturn(Optional.of(laterOnly));
+        given(stockCandleQueryPort.findCandles(eq(STOCK_CODE), eq(CandleInterval.DAY), any(LocalDate.class), eq(TO)))
+                .willReturn(List.of(laterOnly));
+        given(stockCandleRepository.findByStockCodeAndIntervalAndCandleTimeBetweenOrderByCandleTimeAsc(
+                eq(STOCK_CODE), eq(CandleInterval.DAY), any(LocalDateTime.class), any(LocalDateTime.class)))
+                .willReturn(List.of(laterOnly));
+
+        stockCandleService.getCandles(STOCK_CODE, CandleInterval.DAY, FROM, TO);
+
+        ArgumentCaptor<LocalDate> fetchFrom = ArgumentCaptor.forClass(LocalDate.class);
+        verify(stockCandleQueryPort).findCandles(eq(STOCK_CODE), eq(CandleInterval.DAY), fetchFrom.capture(), eq(TO));
+        assertThat(fetchFrom.getValue()).isEqualTo(FROM);
+    }
+
+    @Test
     void fallsBackToDbWhenKisFails() {
         StockCandle stored = candle(LocalDate.of(2025, 1, 10));
-        given(stockCandleRepository.findTopByStockCodeAndIntervalOrderByCandleTimeDesc(STOCK_CODE, CandleInterval.DAY))
+        given(stockCandleRepository.findTopByStockCodeAndIntervalOrderByCandleTimeAsc(STOCK_CODE, CandleInterval.DAY))
                 .willReturn(Optional.empty());
         given(stockCandleQueryPort.findCandles(STOCK_CODE, CandleInterval.DAY, FROM, TO))
                 .willThrow(new RuntimeException("KIS down"));
@@ -106,7 +128,7 @@ class StockCandleServiceTest {
 
     @Test
     void doesNotPersistWhenKisReturnsEmpty() {
-        given(stockCandleRepository.findTopByStockCodeAndIntervalOrderByCandleTimeDesc(STOCK_CODE, CandleInterval.DAY))
+        given(stockCandleRepository.findTopByStockCodeAndIntervalOrderByCandleTimeAsc(STOCK_CODE, CandleInterval.DAY))
                 .willReturn(Optional.empty());
         given(stockCandleQueryPort.findCandles(STOCK_CODE, CandleInterval.DAY, FROM, TO))
                 .willReturn(List.of());
