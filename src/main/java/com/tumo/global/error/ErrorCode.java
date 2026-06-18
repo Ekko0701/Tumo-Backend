@@ -72,6 +72,24 @@ public enum ErrorCode {
     ),
 
     /**
+     * 캔들(차트) 조회 기간이 올바르지 않은 경우(시작일이 종료일보다 이후이거나 미래 구간 등).
+     */
+    INVALID_CANDLE_RANGE(
+            HttpStatus.BAD_REQUEST,
+            "INVALID_CANDLE_RANGE",
+            "캔들 조회 기간이 올바르지 않습니다."
+    ),
+
+    /**
+     * 캔들(차트) 데이터를 조회할 수 없는 경우.
+     */
+    CANDLE_DATA_UNAVAILABLE(
+            HttpStatus.SERVICE_UNAVAILABLE,
+            "CANDLE_DATA_UNAVAILABLE",
+            "캔들 데이터를 조회할 수 없습니다."
+    ),
+
+    /**
      * 서버 내부에서 예상하지 못한 오류가 발생한 경우.
      */
     INTERNAL_SERVER_ERROR(

@@ -2,6 +2,7 @@ package com.tumo.stock.adapter.out.kis.config;
 
 import com.tumo.stock.adapter.out.kis.rest.auth.KisAccessTokenClient;
 import com.tumo.stock.adapter.out.kis.websocket.auth.KisApprovalKeyClient;
+import com.tumo.stock.adapter.out.kis.rest.candle.KisStockCandleQueryClient;
 import com.tumo.stock.adapter.out.kis.rest.price.KisStockPriceQueryClient;
 import com.tumo.stock.adapter.out.kis.rest.ranking.KisStockRankingQueryClient;
 import com.tumo.stock.adapter.out.kis.rest.client.KisRestClient;
@@ -79,6 +80,18 @@ public class KisConfiguration {
     @ConditionalOnProperty(prefix = "kis", name = "enabled", havingValue = "true")
     KisStockRankingQueryClient kisStockRankingQueryClient(KisRestClient kisRestClient) {
         return new KisStockRankingQueryClient(kisRestClient);
+    }
+
+    /**
+     * KIS REST API 기반 종목 캔들(차트) 조회 client bean을 생성한다.
+     *
+     * @param kisRestClient KIS REST API 공통 client
+     * @return KIS REST API 기반 종목 캔들 조회 client
+     */
+    @Bean
+    @ConditionalOnProperty(prefix = "kis", name = "enabled", havingValue = "true")
+    KisStockCandleQueryClient kisStockCandleQueryClient(KisRestClient kisRestClient) {
+        return new KisStockCandleQueryClient(kisRestClient);
     }
 
     /**
