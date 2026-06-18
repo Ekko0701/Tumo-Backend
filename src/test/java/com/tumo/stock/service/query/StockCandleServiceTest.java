@@ -24,6 +24,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @ExtendWith(MockitoExtension.class)
 class StockCandleServiceTest {
@@ -37,6 +38,9 @@ class StockCandleServiceTest {
 
     @Mock
     private StockCandleQueryPort stockCandleQueryPort;
+
+    @Mock
+    private PlatformTransactionManager transactionManager;
 
     @InjectMocks
     private StockCandleService stockCandleService;
