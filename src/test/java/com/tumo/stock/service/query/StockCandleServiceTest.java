@@ -144,6 +144,18 @@ class StockCandleServiceTest {
     }
 
     @Test
+    void rejectsMinuteRangeExceedingCap() {
+        // 분봉은 1회 조회 기간 상한(7일)을 넘으면 KIS를 호출하기 전에 거절해야 한다.
+        LocalDate from = LocalDate.now().minusDays(60);
+        LocalDate to = LocalDate.now();
+
+        assertThatThrownBy(() -> stockCandleService.getCandles(STOCK_CODE, CandleInterval.MINUTE, from, to))
+                .isInstanceOf(BusinessException.class);
+
+        verify(stockCandleQueryPort, never()).findCandles(any(), any(), any(), any());
+    }
+
+    @Test
     void throwsWhenRangeInvalid() {
         assertThatThrownBy(() -> stockCandleService.getCandles(STOCK_CODE, CandleInterval.DAY, TO, FROM))
                 .isInstanceOf(BusinessException.class);

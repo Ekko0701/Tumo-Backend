@@ -9,6 +9,7 @@ import com.tumo.stock.port.query.StockCandleQueryPort;
 import com.tumo.stock.repository.StockCandleRepository;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +27,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class StockCandleService {
 
+    /**
+     * 분봉 1회 조회 허용 최대 기간(일). 넓은 분봉 요청이 KIS 호출 폭증을 일으키지 않도록 제한한다.
+     * 차트 화면에 한 번에 보이는 분봉(약 1.5거래일)의 넉넉한 배수로 잡아 스크롤 프리페치를 충분히 허용한다.
+     */
+    private static final long MAX_MINUTE_RANGE_DAYS = 7;
+
     private final StockCandleRepository stockCandleRepository;
     private final StockCandleQueryPort stockCandleQueryPort;
 
@@ -40,7 +47,7 @@ public class StockCandleService {
      */
     @Transactional
     public StockCandleListResponse getCandles(String stockCode, CandleInterval interval, LocalDate from, LocalDate to) {
-        validateRange(from, to);
+        validateRange(interval, from, to);
         synchronizeCandles(stockCode, interval, from, to);
 
         List<StockCandle> candles = stockCandleRepository
@@ -54,8 +61,12 @@ public class StockCandleService {
         return StockCandleListResponse.of(stockCode, interval, candles);
     }
 
-    private void validateRange(LocalDate from, LocalDate to) {
+    private void validateRange(CandleInterval interval, LocalDate from, LocalDate to) {
         if (from == null || to == null || from.isAfter(to) || from.isAfter(LocalDate.now())) {
+            throw new BusinessException(ErrorCode.INVALID_CANDLE_RANGE);
+        }
+        // 분봉은 하루당 KIS 호출이 많아, 넓은 기간 요청 시 호출이 폭증한다. 1회 조회 기간을 제한한다.
+        if (interval.isMinute() && ChronoUnit.DAYS.between(from, to) > MAX_MINUTE_RANGE_DAYS) {
             throw new BusinessException(ErrorCode.INVALID_CANDLE_RANGE);
         }
     }
