@@ -39,15 +39,6 @@ public interface StockCandleRepository extends JpaRepository<StockCandle, Long> 
     );
 
     /**
-     * 종목·시간 단위·기준 시각의 캔들이 이미 저장돼 있는지 확인한다. upsert 시 중복 방지에 사용한다.
-     */
-    boolean existsByStockCodeAndIntervalAndCandleTime(
-            String stockCode,
-            CandleInterval interval,
-            LocalDateTime candleTime
-    );
-
-    /**
      * 종목·시간 단위의 특정 시각 범위 캔들을 즉시 삭제한다. 최신 봉을 새 데이터로 교체(delete-then-insert)할 때 사용한다.
      *
      * <p>벌크 삭제로 즉시 실행되어 같은 트랜잭션의 후속 insert와 유니크 제약이 충돌하지 않는다.</p>
