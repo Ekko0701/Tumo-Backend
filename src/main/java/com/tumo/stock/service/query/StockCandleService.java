@@ -7,6 +7,7 @@ import com.tumo.stock.domain.candle.StockCandle;
 import com.tumo.stock.dto.StockCandleListResponse;
 import com.tumo.stock.port.query.StockCandleQueryPort;
 import com.tumo.stock.repository.StockCandleRepository;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
@@ -38,6 +39,11 @@ public class StockCandleService {
     private final StockCandleQueryPort stockCandleQueryPort;
 
     /**
+     * "오늘" 판정 기준 Clock. KST 고정 Clock을 주입받아 서버 기본 타임존에 의존하지 않는다.
+     */
+    private final Clock clock;
+
+    /**
      * DB 쓰기(삭제 후 삽입)를 원자적으로 묶기 위한 트랜잭션 실행기. KIS 호출과 분리해 트랜잭션을 짧게 유지한다.
      */
     private final TransactionTemplate transactionTemplate;
@@ -45,10 +51,12 @@ public class StockCandleService {
     public StockCandleService(
             StockCandleRepository stockCandleRepository,
             StockCandleQueryPort stockCandleQueryPort,
-            PlatformTransactionManager transactionManager
+            PlatformTransactionManager transactionManager,
+            Clock clock
     ) {
         this.stockCandleRepository = stockCandleRepository;
         this.stockCandleQueryPort = stockCandleQueryPort;
+        this.clock = clock;
         this.transactionTemplate = new TransactionTemplate(transactionManager);
     }
 
@@ -65,12 +73,15 @@ public class StockCandleService {
      * @return 캔들 기준 시각 오름차순 캔들 목록 응답
      */
     public StockCandleListResponse getCandles(String stockCode, CandleInterval interval, LocalDate from, LocalDate to) {
-        validateRange(interval, from, to);
+        LocalDate today = LocalDate.now(clock);
+        // 미래 구간은 받을 데이터가 없으므로 종료 일자를 오늘로 잘라낸다(검증·KIS 호출·DB 조회 모두 동일 기준).
+        LocalDate effectiveTo = clampToToday(to, today);
+        validateRange(interval, from, effectiveTo, today);
 
         LocalDate fetchFrom = resolveFetchStart(stockCode, interval, from);
-        List<StockCandle> fetched = fetchFromKis(stockCode, interval, fetchFrom, to);
+        List<StockCandle> fetched = fetchFromKis(stockCode, interval, fetchFrom, effectiveTo);
         if (!fetched.isEmpty()) {
-            replaceWindow(stockCode, interval, fetchFrom, to, fetched);
+            replaceWindow(stockCode, interval, fetchFrom, effectiveTo, fetched);
         }
 
         List<StockCandle> candles = stockCandleRepository
@@ -78,14 +89,24 @@ public class StockCandleService {
                         stockCode,
                         interval,
                         from.atStartOfDay(),
-                        to.atTime(LocalTime.MAX)
+                        effectiveTo.atTime(LocalTime.MAX)
                 );
 
         return StockCandleListResponse.of(stockCode, interval, candles);
     }
 
-    private void validateRange(CandleInterval interval, LocalDate from, LocalDate to) {
-        if (from == null || to == null || from.isAfter(to) || from.isAfter(LocalDate.now())) {
+    /**
+     * 종료 일자가 미래(오늘 이후)이면 오늘로 잘라낸다. {@code null}은 검증 단계에서 거르도록 그대로 통과시킨다.
+     */
+    private LocalDate clampToToday(LocalDate to, LocalDate today) {
+        if (to != null && to.isAfter(today)) {
+            return today;
+        }
+        return to;
+    }
+
+    private void validateRange(CandleInterval interval, LocalDate from, LocalDate to, LocalDate today) {
+        if (from == null || to == null || from.isAfter(to) || from.isAfter(today)) {
             throw new BusinessException(ErrorCode.INVALID_CANDLE_RANGE);
         }
         // 분봉은 하루당 KIS 호출이 많아, 넓은 기간 요청 시 호출이 폭증한다. 1회 조회 기간을 제한한다.

@@ -4,6 +4,7 @@ import com.tumo.stock.adapter.out.kis.rest.client.KisRestClient;
 import com.tumo.stock.domain.candle.CandleInterval;
 import com.tumo.stock.domain.candle.StockCandle;
 import com.tumo.stock.port.query.StockCandleQueryPort;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -37,8 +38,14 @@ public class KisStockCandleQueryClient implements StockCandleQueryPort {
 
     private final KisRestClient restClient;
 
-    public KisStockCandleQueryClient(KisRestClient restClient) {
+    /**
+     * 분봉 당일/과거 분기의 "오늘" 판정 기준 Clock. KST 고정 Clock을 주입받아 서버 기본 타임존에 의존하지 않는다.
+     */
+    private final Clock clock;
+
+    public KisStockCandleQueryClient(KisRestClient restClient, Clock clock) {
         this.restClient = Objects.requireNonNull(restClient, "KIS REST client는 필수입니다.");
+        this.clock = Objects.requireNonNull(clock, "Clock은 필수입니다.");
     }
 
     @Override
@@ -85,7 +92,7 @@ public class KisStockCandleQueryClient implements StockCandleQueryPort {
 
     private List<StockCandle> fetchMinuteCandles(String stockCode, LocalDate from, LocalDate to) {
         TreeMap<LocalDateTime, StockCandle> merged = new TreeMap<>();
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(clock);
 
         for (LocalDate date = to; !date.isBefore(from); date = date.minusDays(1)) {
             if (date.isAfter(today)) {

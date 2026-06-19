@@ -225,9 +225,9 @@ flowchart LR
 
 | 항목 | 내용 | 제안 |
 |------|------|------|
-| 타임존 | `LocalDate.now()`로 "오늘"을 판단 → 서버 TZ가 KST가 아니면 분봉 당일/과거 분기가 틀어짐 | 서버 TZ를 KST로 고정하거나 `Clock`/`ZoneId` 주입 |
+| ✅ 타임존 (수정 완료) | `LocalDate.now()`로 "오늘"을 판단 → 서버 TZ가 KST가 아니면 분봉 당일/과거 분기가 틀어짐 | `ClockConfig`에서 `Asia/Seoul` 기준 `Clock` bean을 주입. `StockCandleService`·`KisStockCandleQueryClient`가 `LocalDate.now(clock)`을 사용 |
 | 동시성 | 같은 종목·interval에 동시 요청 시 delete→insert가 겹치면 충돌/유실 가능 | MVP는 허용. 추후 종목별 락 또는 upsert |
-| `to` 미래값 | `from`만 미래 검증, `to`는 미검증 | 큰 문제는 없으나 `to`도 오늘로 clamp 고려 |
+| ✅ `to` 미래값 (수정 완료) | `from`만 미래 검증, `to`는 미검증 | `getCandles`가 `to`를 오늘(KST)로 clamp(`clampToToday`)한 뒤 검증·KIS 호출·DB 조회를 동일 기준으로 수행. 회귀 테스트 `clampsFutureToToToday`/`rejectsFutureFrom` 추가 |
 | 인증 | 새 엔드포인트가 Security 설정(`/api/v1/stocks/**`)에 어떻게 걸리는지 확인 필요 | 기존 종목 API와 동일 정책인지 확인 |
 | KIS 필드명 | output2 필드명(`stck_oprc` 등)·레코드 한도는 best-known 값 | 실연동 전 KIS 개발자센터 문서로 확정 |
 
@@ -250,7 +250,8 @@ flowchart TD
 - [x] **(필수)** 좁은 범위 → 넓은 범위 요청 시 앞부분이 채워지는지 검증 (HIGH 버그) — 수정 + 회귀 테스트 완료
 - [ ] **(필수)** 분봉 장기간 요청 시 KIS 호출 폭증 방지 가드
 - [ ] 사용하지 않는 `existsBy...` 메서드 제거
-- [ ] 서버 타임존이 KST인지 확인 (분봉 "오늘" 판정)
+- [x] 서버 타임존이 KST인지 확인 (분봉 "오늘" 판정) — `ClockConfig`로 KST `Clock` 주입해 해결
+- [x] `to` 미래값 처리 — 오늘(KST)로 clamp + 회귀 테스트 추가
 - [ ] 새 엔드포인트의 인증/인가 정책 확인
 - [ ] 실제 KIS 키로 일/주/월/년/분봉 응답·DB 적재·재요청 캐시 동작 e2e 확인
 - [ ] (확장 시) 동시 요청 정합성, Redis 캐시 도입 검토
