@@ -50,7 +50,7 @@ class StockPriceSubscriptionServiceTest {
         Stock skHynix = new Stock("000660", "SK하이닉스", Market.KOSPI, 180000L, priceChangedAt);
         given(stockRepository.findByStockCode("005930")).willReturn(Optional.of(samsung));
         given(stockRepository.findByStockCode("000660")).willReturn(Optional.of(skHynix));
-        given(stockRealtimeSubscriptionRegistry.registerNewPriceSubscriptions(List.of("005930", "000660")))
+        given(stockRealtimeSubscriptionRegistry.acquirePriceSubscriptions(List.of("005930", "000660")))
                 .willReturn(List.of("005930", "000660"));
 
         stockPriceSubscriptionService.subscribe(List.of("005930", "000660"));
@@ -79,7 +79,7 @@ class StockPriceSubscriptionServiceTest {
         LocalDateTime priceChangedAt = LocalDateTime.of(2026, 5, 25, 9, 0);
         Stock samsung = new Stock("005930", "삼성전자", Market.KOSPI, 75000L, priceChangedAt);
         given(stockRepository.findByStockCode("005930")).willReturn(Optional.of(samsung));
-        given(stockRealtimeSubscriptionRegistry.registerNewPriceSubscriptions(List.of("005930")))
+        given(stockRealtimeSubscriptionRegistry.acquirePriceSubscriptions(List.of("005930")))
                 .willReturn(List.of());
 
         stockPriceSubscriptionService.subscribe(List.of("005930"));
@@ -106,7 +106,7 @@ class StockPriceSubscriptionServiceTest {
         LocalDateTime priceChangedAt = LocalDateTime.of(2026, 5, 25, 9, 0);
         Stock samsung = new Stock("005930", "삼성전자", Market.KOSPI, 75000L, priceChangedAt);
         given(stockRepository.findByStockCode("005930")).willReturn(Optional.of(samsung));
-        given(stockRealtimeSubscriptionRegistry.registerNewPriceSubscriptions(List.of("005930")))
+        given(stockRealtimeSubscriptionRegistry.acquirePriceSubscriptions(List.of("005930")))
                 .willReturn(List.of("005930"));
         willThrow(new RuntimeException("KIS 연결 실패"))
                 .given(stockRealtimePriceClient)
@@ -115,7 +115,36 @@ class StockPriceSubscriptionServiceTest {
         assertThatThrownBy(() -> stockPriceSubscriptionService.subscribe(List.of("005930")))
                 .isInstanceOf(RuntimeException.class);
 
-        verify(stockRealtimeSubscriptionRegistry).unregisterPriceSubscriptions(List.of("005930"));
+        verify(stockRealtimeSubscriptionRegistry).releasePriceSubscriptions(List.of("005930"));
+    }
+
+    @Test
+    void unsubscribeUnsubscribesOnlyStockCodesWhoseLastReferenceIsGone() {
+        // 마지막 참조가 사라진 종목만 KIS 구독을 해제한다.
+        given(stockRealtimeSubscriptionRegistry.releasePriceSubscriptions(List.of("005930", "000660")))
+                .willReturn(List.of("000660"));
+
+        stockPriceSubscriptionService.unsubscribe(List.of("005930", "000660"));
+
+        verify(stockRealtimePriceClient).unsubscribe(List.of("000660"));
+    }
+
+    @Test
+    void unsubscribeDoesNotCallClientWhenNoStockCodeReachesZeroReference() {
+        given(stockRealtimeSubscriptionRegistry.releasePriceSubscriptions(List.of("005930")))
+                .willReturn(List.of());
+
+        stockPriceSubscriptionService.unsubscribe(List.of("005930"));
+
+        verify(stockRealtimePriceClient, never()).unsubscribe(any());
+    }
+
+    @Test
+    void unsubscribeDoesNothingWhenStockCodesIsNullOrEmpty() {
+        stockPriceSubscriptionService.unsubscribe(null);
+        stockPriceSubscriptionService.unsubscribe(List.of());
+
+        verify(stockRealtimePriceClient, never()).unsubscribe(any());
     }
 
     @Test
@@ -124,7 +153,7 @@ class StockPriceSubscriptionServiceTest {
         Stock samsung = new Stock("005930", "삼성전자", Market.KOSPI, 75000L, priceChangedAt);
         Stock skHynix = new Stock("000660", "SK하이닉스", Market.KOSPI, 180000L, priceChangedAt);
         given(stockRepository.findAll()).willReturn(List.of(samsung, skHynix));
-        given(stockRealtimeSubscriptionRegistry.registerNewPriceSubscriptions(List.of("005930", "000660")))
+        given(stockRealtimeSubscriptionRegistry.acquirePriceSubscriptions(List.of("005930", "000660")))
                 .willReturn(List.of("005930", "000660"));
 
         stockPriceSubscriptionService.subscribeAllStocks();
@@ -142,7 +171,7 @@ class StockPriceSubscriptionServiceTest {
         Stock skHynix = new Stock("000660", "SK하이닉스", Market.KOSPI, 180000L, priceChangedAt);
         Stock naver = new Stock("035420", "NAVER", Market.KOSPI, 190000L, priceChangedAt);
         given(stockRepository.findAll()).willReturn(List.of(samsung, skHynix, naver));
-        given(stockRealtimeSubscriptionRegistry.registerNewPriceSubscriptions(List.of("005930", "000660", "035420")))
+        given(stockRealtimeSubscriptionRegistry.acquirePriceSubscriptions(List.of("005930", "000660", "035420")))
                 .willReturn(List.of("035420"));
 
         stockPriceSubscriptionService.subscribeAllStocks();
@@ -158,7 +187,7 @@ class StockPriceSubscriptionServiceTest {
         LocalDateTime priceChangedAt = LocalDateTime.of(2026, 5, 25, 9, 0);
         Stock samsung = new Stock("005930", "삼성전자", Market.KOSPI, 75000L, priceChangedAt);
         given(stockRepository.findAll()).willReturn(List.of(samsung));
-        given(stockRealtimeSubscriptionRegistry.registerNewPriceSubscriptions(List.of("005930")))
+        given(stockRealtimeSubscriptionRegistry.acquirePriceSubscriptions(List.of("005930")))
                 .willReturn(List.of());
 
         stockPriceSubscriptionService.subscribeAllStocks();

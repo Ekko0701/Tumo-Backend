@@ -57,7 +57,11 @@ public class StockRealtimeStreamController {
             @RequestParam(required = false) List<String> stockCodes
     ) {
         stockPriceSubscriptionService.subscribe(stockCodes);
-        return stockPriceSseEmitterRegistry.connect(stockCodes);
+        // SSE 연결이 끊기면 이 연결이 잡은 종목 구독 참조를 해제해, KIS 구독이 누적되지 않게 한다.
+        return stockPriceSseEmitterRegistry.connect(
+                stockCodes,
+                () -> stockPriceSubscriptionService.unsubscribe(stockCodes)
+        );
     }
 
     /**
