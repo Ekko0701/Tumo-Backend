@@ -33,7 +33,7 @@ public class StockOrderBookSubscriptionService {
         stockRepository.findByStockCode(stockCode)
                 .orElseThrow(() -> new BusinessException(ErrorCode.STOCK_NOT_FOUND));
 
-        List<String> newStockCodes = stockRealtimeSubscriptionRegistry.registerNewOrderBookSubscriptions(List.of(stockCode));
+        List<String> newStockCodes = stockRealtimeSubscriptionRegistry.acquireOrderBookSubscriptions(List.of(stockCode));
 
         if (newStockCodes.isEmpty()) {
             return;
@@ -42,8 +42,29 @@ public class StockOrderBookSubscriptionService {
         try {
             stockRealtimeOrderBookClient.subscribe(newStockCodes, stockOrderBookService::handle);
         } catch (RuntimeException exception) {
-            stockRealtimeSubscriptionRegistry.unregisterOrderBookSubscriptions(newStockCodes);
+            stockRealtimeSubscriptionRegistry.releaseOrderBookSubscriptions(newStockCodes);
             throw exception;
         }
+    }
+
+    /**
+     * 단일 종목의 실시간 호가 이벤트 구독 참조를 해제한다.
+     *
+     * <p>SSE 연결이 끊길 때 호출되며, 마지막 참조가 사라진 종목만 실제로 KIS 구독을 해제한다.</p>
+     *
+     * @param stockCode 구독 참조를 해제할 종목 코드
+     */
+    public void unsubscribe(String stockCode) {
+        if (stockCode == null || stockCode.isBlank()) {
+            return;
+        }
+
+        List<String> releasedStockCodes = stockRealtimeSubscriptionRegistry.releaseOrderBookSubscriptions(List.of(stockCode));
+
+        if (releasedStockCodes.isEmpty()) {
+            return;
+        }
+
+        stockRealtimeOrderBookClient.unsubscribeOrderBook(releasedStockCodes);
     }
 }

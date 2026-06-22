@@ -34,9 +34,9 @@ class StockRealtimeSubscriptionRegistryTest {
     }
 
     @Test
-    void registerNewOrderBookSubscriptionsReturnsOnlyNewStockCodes() {
-        List<String> firstResult = registry.registerNewOrderBookSubscriptions(List.of("005930", "000660"));
-        List<String> secondResult = registry.registerNewOrderBookSubscriptions(List.of("005930", "000660", "035420"));
+    void acquireOrderBookSubscriptionsReturnsOnlyNewStockCodes() {
+        List<String> firstResult = registry.acquireOrderBookSubscriptions(List.of("005930", "000660"));
+        List<String> secondResult = registry.acquireOrderBookSubscriptions(List.of("005930", "000660", "035420"));
 
         assertThat(firstResult).containsExactly("005930", "000660");
         assertThat(secondResult).containsExactly("035420");
@@ -46,7 +46,7 @@ class StockRealtimeSubscriptionRegistryTest {
     void priceAndOrderBookSubscriptionsAreManagedSeparately() {
         registry.acquirePriceSubscriptions(List.of("005930"));
 
-        List<String> result = registry.registerNewOrderBookSubscriptions(List.of("005930"));
+        List<String> result = registry.acquireOrderBookSubscriptions(List.of("005930"));
 
         assertThat(result).containsExactly("005930");
     }
@@ -62,7 +62,7 @@ class StockRealtimeSubscriptionRegistryTest {
 
     @Test
     void getSubscribedOrderBookStockCodesReturnsSortedStockCodes() {
-        registry.registerNewOrderBookSubscriptions(List.of("005930", "000660"));
+        registry.acquireOrderBookSubscriptions(List.of("005930", "000660"));
 
         List<String> result = registry.getSubscribedOrderBookStockCodes();
 
@@ -80,11 +80,11 @@ class StockRealtimeSubscriptionRegistryTest {
     }
 
     @Test
-    void unregisterOrderBookSubscriptionsRemovesSubscribedStockCodes() {
-        registry.registerNewOrderBookSubscriptions(List.of("005930"));
-        registry.unregisterOrderBookSubscriptions(List.of("005930"));
+    void releaseOrderBookSubscriptionsRemovesSubscribedStockCodes() {
+        registry.acquireOrderBookSubscriptions(List.of("005930"));
+        registry.releaseOrderBookSubscriptions(List.of("005930"));
 
-        List<String> result = registry.registerNewOrderBookSubscriptions(List.of("005930"));
+        List<String> result = registry.acquireOrderBookSubscriptions(List.of("005930"));
 
         assertThat(result).containsExactly("005930");
     }

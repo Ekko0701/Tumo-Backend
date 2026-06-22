@@ -75,7 +75,7 @@ public class StockPriceSubscriptionService {
             return;
         }
 
-        stockRealtimePriceClient.unsubscribe(releasedStockCodes);
+        stockRealtimePriceClient.unsubscribePrice(releasedStockCodes);
     }
 
     private void subscribeNewStocks(List<String> stockCodes) {

@@ -56,13 +56,14 @@ class StockRealtimeStreamControllerTest {
     @Test
     void streamRealtimeOrderBook() {
         SseEmitter expectedEmitter = new SseEmitter();
-        given(stockOrderBookSseEmitterRegistry.connect("005930")).willReturn(expectedEmitter);
+        given(stockOrderBookSseEmitterRegistry.connect(eq("005930"), any(Runnable.class)))
+                .willReturn(expectedEmitter);
 
         SseEmitter emitter = stockRealtimeStreamController.streamRealtimeOrderBook("005930");
 
         assertThat(emitter).isEqualTo(expectedEmitter);
         InOrder inOrder = Mockito.inOrder(stockOrderBookSubscriptionService, stockOrderBookSseEmitterRegistry);
         inOrder.verify(stockOrderBookSubscriptionService).subscribe("005930");
-        inOrder.verify(stockOrderBookSseEmitterRegistry).connect("005930");
+        inOrder.verify(stockOrderBookSseEmitterRegistry).connect(eq("005930"), any(Runnable.class));
     }
 }

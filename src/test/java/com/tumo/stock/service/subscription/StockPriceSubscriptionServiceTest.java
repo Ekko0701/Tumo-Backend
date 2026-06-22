@@ -126,7 +126,7 @@ class StockPriceSubscriptionServiceTest {
 
         stockPriceSubscriptionService.unsubscribe(List.of("005930", "000660"));
 
-        verify(stockRealtimePriceClient).unsubscribe(List.of("000660"));
+        verify(stockRealtimePriceClient).unsubscribePrice(List.of("000660"));
     }
 
     @Test
@@ -136,7 +136,7 @@ class StockPriceSubscriptionServiceTest {
 
         stockPriceSubscriptionService.unsubscribe(List.of("005930"));
 
-        verify(stockRealtimePriceClient, never()).unsubscribe(any());
+        verify(stockRealtimePriceClient, never()).unsubscribePrice(any());
     }
 
     @Test
@@ -144,7 +144,7 @@ class StockPriceSubscriptionServiceTest {
         stockPriceSubscriptionService.unsubscribe(null);
         stockPriceSubscriptionService.unsubscribe(List.of());
 
-        verify(stockRealtimePriceClient, never()).unsubscribe(any());
+        verify(stockRealtimePriceClient, never()).unsubscribePrice(any());
     }
 
     @Test
