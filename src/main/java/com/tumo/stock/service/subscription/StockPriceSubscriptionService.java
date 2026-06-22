@@ -56,8 +56,30 @@ public class StockPriceSubscriptionService {
         subscribeNewStocks(stockCodes);
     }
 
+    /**
+     * 지정한 종목의 실시간 가격 이벤트 구독 참조를 해제한다.
+     *
+     * <p>SSE 연결이 끊길 때 호출되며, 마지막 참조가 사라진 종목만 실제로 KIS 구독을 해제한다.
+     * 그래야 KIS 세션의 종목 등록 수가 "현재 보고 있는 종목"으로만 유지된다.</p>
+     *
+     * @param stockCodes 구독 참조를 해제할 종목 코드 목록
+     */
+    public void unsubscribe(List<String> stockCodes) {
+        if (stockCodes == null || stockCodes.isEmpty()) {
+            return;
+        }
+
+        List<String> releasedStockCodes = stockRealtimeSubscriptionRegistry.releasePriceSubscriptions(stockCodes);
+
+        if (releasedStockCodes.isEmpty()) {
+            return;
+        }
+
+        stockRealtimePriceClient.unsubscribe(releasedStockCodes);
+    }
+
     private void subscribeNewStocks(List<String> stockCodes) {
-        List<String> newStockCodes = stockRealtimeSubscriptionRegistry.registerNewPriceSubscriptions(stockCodes);
+        List<String> newStockCodes = stockRealtimeSubscriptionRegistry.acquirePriceSubscriptions(stockCodes);
 
         if (newStockCodes.isEmpty()) {
             return;
@@ -66,7 +88,7 @@ public class StockPriceSubscriptionService {
         try {
             stockRealtimePriceClient.subscribe(newStockCodes, stockRealtimePriceService::handle);
         } catch (RuntimeException exception) {
-            stockRealtimeSubscriptionRegistry.unregisterPriceSubscriptions(newStockCodes);
+            stockRealtimeSubscriptionRegistry.releasePriceSubscriptions(newStockCodes);
             throw exception;
         }
     }

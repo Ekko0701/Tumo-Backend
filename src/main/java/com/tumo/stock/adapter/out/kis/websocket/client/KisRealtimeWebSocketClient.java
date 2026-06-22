@@ -125,7 +125,9 @@ public class KisRealtimeWebSocketClient implements StockRealtimePriceClient, Sto
     }
 
     /**
-     * 여러 종목의 KIS 실시간체결가와 실시간호가 구독을 해제한다.
+     * 여러 종목의 KIS 실시간체결가 구독을 해제한다.
+     *
+     * <p>체결가 전용이다. 호가 구독에 영향을 주지 않도록 체결가 해제 메시지만 전송한다.</p>
      *
      * @param stockCodes 구독을 해제할 종목 코드 목록
      */
@@ -140,10 +142,9 @@ public class KisRealtimeWebSocketClient implements StockRealtimePriceClient, Sto
         String approvalKey = approvalKeyClient.issueApprovalKey();
         WebSocket webSocket = sessionManager.connect(this::handleRawMessage);
 
-        normalizedStockCodes.forEach(stockCode -> {
-            messageSender.send(webSocket, KisWebSocketSubscribeMessage.unsubscribeTradePrice(approvalKey, properties, stockCode));
-            messageSender.send(webSocket, KisWebSocketSubscribeMessage.unsubscribeOrderBook(approvalKey, properties, stockCode));
-        });
+        normalizedStockCodes.stream()
+                .map(stockCode -> KisWebSocketSubscribeMessage.unsubscribeTradePrice(approvalKey, properties, stockCode))
+                .forEach(message -> messageSender.send(webSocket, message));
     }
 
     /**

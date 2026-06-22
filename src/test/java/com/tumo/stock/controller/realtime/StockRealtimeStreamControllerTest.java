@@ -1,6 +1,8 @@
 package com.tumo.stock.controller.realtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
@@ -40,14 +42,15 @@ class StockRealtimeStreamControllerTest {
     void streamRealtimePrices() {
         SseEmitter expectedEmitter = new SseEmitter();
         List<String> stockCodes = List.of("005930", "000660");
-        given(stockPriceSseEmitterRegistry.connect(stockCodes)).willReturn(expectedEmitter);
+        given(stockPriceSseEmitterRegistry.connect(eq(stockCodes), any(Runnable.class)))
+                .willReturn(expectedEmitter);
 
         SseEmitter emitter = stockRealtimeStreamController.streamRealtimePrices(stockCodes);
 
         assertThat(emitter).isEqualTo(expectedEmitter);
         InOrder inOrder = Mockito.inOrder(stockPriceSubscriptionService, stockPriceSseEmitterRegistry);
         inOrder.verify(stockPriceSubscriptionService).subscribe(stockCodes);
-        inOrder.verify(stockPriceSseEmitterRegistry).connect(stockCodes);
+        inOrder.verify(stockPriceSseEmitterRegistry).connect(eq(stockCodes), any(Runnable.class));
     }
 
     @Test
