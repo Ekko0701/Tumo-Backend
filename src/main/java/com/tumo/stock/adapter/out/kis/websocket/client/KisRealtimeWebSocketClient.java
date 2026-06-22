@@ -132,7 +132,23 @@ public class KisRealtimeWebSocketClient implements StockRealtimePriceClient, Sto
      * @param stockCodes 구독을 해제할 종목 코드 목록
      */
     @Override
-    public void unsubscribe(Collection<String> stockCodes) {
+    public void unsubscribePrice(Collection<String> stockCodes) {
+        sendUnsubscribe(stockCodes, KisWebSocketSubscribeMessage::unsubscribeTradePrice);
+    }
+
+    /**
+     * 여러 종목의 KIS 실시간호가 구독을 해제한다.
+     *
+     * <p>호가 전용이다. 체결가 구독에 영향을 주지 않도록 호가 해제 메시지만 전송한다.</p>
+     *
+     * @param stockCodes 구독을 해제할 종목 코드 목록
+     */
+    @Override
+    public void unsubscribeOrderBook(Collection<String> stockCodes) {
+        sendUnsubscribe(stockCodes, KisWebSocketSubscribeMessage::unsubscribeOrderBook);
+    }
+
+    private void sendUnsubscribe(Collection<String> stockCodes, UnsubscribeMessageFactory messageFactory) {
         List<String> normalizedStockCodes = normalizeStockCodes(stockCodes);
 
         if (normalizedStockCodes.isEmpty()) {
@@ -143,8 +159,16 @@ public class KisRealtimeWebSocketClient implements StockRealtimePriceClient, Sto
         WebSocket webSocket = sessionManager.connect(this::handleRawMessage);
 
         normalizedStockCodes.stream()
-                .map(stockCode -> KisWebSocketSubscribeMessage.unsubscribeTradePrice(approvalKey, properties, stockCode))
+                .map(stockCode -> messageFactory.create(approvalKey, properties, stockCode))
                 .forEach(message -> messageSender.send(webSocket, message));
+    }
+
+    /**
+     * 종목 코드별 KIS 구독 해제 메시지를 생성하는 factory. 체결가/호가 해제 메시지 생성을 공유한다.
+     */
+    @FunctionalInterface
+    private interface UnsubscribeMessageFactory {
+        KisWebSocketSubscribeMessage create(String approvalKey, KisProperties properties, String stockCode);
     }
 
     /**

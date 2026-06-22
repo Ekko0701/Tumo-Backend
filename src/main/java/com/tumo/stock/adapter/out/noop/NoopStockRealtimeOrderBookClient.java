@@ -25,4 +25,14 @@ public class NoopStockRealtimeOrderBookClient implements StockRealtimeOrderBookC
     public void subscribe(Collection<String> stockCodes, StockOrderBookEventHandler handler) {
         log.debug("Stock realtime order book client is not configured yet. stockCodes={}", stockCodes);
     }
+
+    /**
+     * 실시간 호가 이벤트 구독 해제를 외부 provider에 전달하지 않고 로그로만 남긴다.
+     *
+     * @param stockCodes 구독을 해제할 종목 코드 목록
+     */
+    @Override
+    public void unsubscribeOrderBook(Collection<String> stockCodes) {
+        log.debug("Stock realtime order book client is not configured yet. stockCodes={}", stockCodes);
+    }
 }

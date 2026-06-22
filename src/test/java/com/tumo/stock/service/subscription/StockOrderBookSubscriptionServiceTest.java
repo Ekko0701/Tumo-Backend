@@ -49,7 +49,7 @@ class StockOrderBookSubscriptionServiceTest {
         LocalDateTime priceChangedAt = LocalDateTime.of(2026, 5, 25, 9, 0);
         Stock samsung = new Stock("005930", "삼성전자", Market.KOSPI, 75000L, priceChangedAt);
         given(stockRepository.findByStockCode("005930")).willReturn(Optional.of(samsung));
-        given(stockRealtimeSubscriptionRegistry.registerNewOrderBookSubscriptions(List.of("005930")))
+        given(stockRealtimeSubscriptionRegistry.acquireOrderBookSubscriptions(List.of("005930")))
                 .willReturn(List.of("005930"));
 
         stockOrderBookSubscriptionService.subscribe("005930");
@@ -65,7 +65,7 @@ class StockOrderBookSubscriptionServiceTest {
         LocalDateTime priceChangedAt = LocalDateTime.of(2026, 5, 25, 9, 0);
         Stock samsung = new Stock("005930", "삼성전자", Market.KOSPI, 75000L, priceChangedAt);
         given(stockRepository.findByStockCode("005930")).willReturn(Optional.of(samsung));
-        given(stockRealtimeSubscriptionRegistry.registerNewOrderBookSubscriptions(List.of("005930")))
+        given(stockRealtimeSubscriptionRegistry.acquireOrderBookSubscriptions(List.of("005930")))
                 .willReturn(List.of());
 
         stockOrderBookSubscriptionService.subscribe("005930");
@@ -87,7 +87,7 @@ class StockOrderBookSubscriptionServiceTest {
         );
         RuntimeException exception = new IllegalStateException("KIS 구독 실패");
         given(stockRepository.findByStockCode("005930")).willReturn(Optional.of(samsung));
-        given(stockRealtimeSubscriptionRegistry.registerNewOrderBookSubscriptions(List.of("005930")))
+        given(stockRealtimeSubscriptionRegistry.acquireOrderBookSubscriptions(List.of("005930")))
                 .willReturn(List.of("005930"));
         org.mockito.BDDMockito.willThrow(exception)
                 .given(stockRealtimeOrderBookClient)
@@ -96,7 +96,35 @@ class StockOrderBookSubscriptionServiceTest {
         assertThatThrownBy(() -> stockOrderBookSubscriptionService.subscribe("005930"))
                 .isEqualTo(exception);
 
-        verify(stockRealtimeSubscriptionRegistry).unregisterOrderBookSubscriptions(List.of("005930"));
+        verify(stockRealtimeSubscriptionRegistry).releaseOrderBookSubscriptions(List.of("005930"));
+    }
+
+    @Test
+    void unsubscribeUnsubscribesWhenLastReferenceIsGone() {
+        given(stockRealtimeSubscriptionRegistry.releaseOrderBookSubscriptions(List.of("005930")))
+                .willReturn(List.of("005930"));
+
+        stockOrderBookSubscriptionService.unsubscribe("005930");
+
+        verify(stockRealtimeOrderBookClient).unsubscribeOrderBook(List.of("005930"));
+    }
+
+    @Test
+    void unsubscribeDoesNotCallClientWhenReferenceRemains() {
+        given(stockRealtimeSubscriptionRegistry.releaseOrderBookSubscriptions(List.of("005930")))
+                .willReturn(List.of());
+
+        stockOrderBookSubscriptionService.unsubscribe("005930");
+
+        verify(stockRealtimeOrderBookClient, never()).unsubscribeOrderBook(any());
+    }
+
+    @Test
+    void unsubscribeDoesNothingWhenStockCodeIsNullOrBlank() {
+        stockOrderBookSubscriptionService.unsubscribe(null);
+        stockOrderBookSubscriptionService.unsubscribe(" ");
+
+        verify(stockRealtimeOrderBookClient, never()).unsubscribeOrderBook(any());
     }
 
     @Test
