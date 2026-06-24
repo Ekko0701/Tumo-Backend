@@ -66,8 +66,15 @@ public class KisTradePriceMessageParser {
 
     /**
      * payload에서 누적 거래량이 위치하는 index.
+     *
+     * <p>주의: index 12는 "체결 거래량"(이번 체결 틱의 수량)이고, 랭킹에 쓰는 누적 거래량은 index 13이다.</p>
      */
-    private static final int TRADE_VOLUME_INDEX = 12;
+    private static final int ACCUMULATED_VOLUME_INDEX = 13;
+
+    /**
+     * payload에서 누적 거래대금이 위치하는 index.
+     */
+    private static final int ACCUMULATED_TRADE_AMOUNT_INDEX = 14;
 
     /**
      * KIS 체결 시각을 {@link LocalDateTime}으로 변환할 때 사용하는 formatter.
@@ -110,7 +117,8 @@ public class KisTradePriceMessageParser {
                 parseLong(fields[CURRENT_PRICE_INDEX]),
                 parseLong(fields[CHANGE_PRICE_INDEX]),
                 parseBigDecimal(fields[CHANGE_RATE_INDEX]),
-                parseLong(fields[TRADE_VOLUME_INDEX]),
+                parseLong(fields[ACCUMULATED_VOLUME_INDEX]),
+                parseLong(fields[ACCUMULATED_TRADE_AMOUNT_INDEX]),
                 parseTradeDateTime(fields[TRADE_TIME_INDEX])
         );
 
@@ -151,7 +159,7 @@ public class KisTradePriceMessageParser {
     private void validateFieldCount(String[] fields) {
         Objects.requireNonNull(fields, "KIS 체결가 payload는 필수입니다.");
 
-        if (fields.length <= TRADE_VOLUME_INDEX) {
+        if (fields.length <= ACCUMULATED_TRADE_AMOUNT_INDEX) {
             throw new IllegalArgumentException("KIS 체결가 payload 필드 수가 부족합니다.");
         }
     }
