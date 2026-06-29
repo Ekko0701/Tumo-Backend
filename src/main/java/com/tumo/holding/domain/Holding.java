@@ -1,5 +1,7 @@
 package com.tumo.holding.domain;
 
+import com.tumo.global.error.BusinessException;
+import com.tumo.global.error.ErrorCode;
 import com.tumo.stock.domain.stock.Stock;
 import com.tumo.user.domain.User;
 import jakarta.persistence.Column;
@@ -71,6 +73,19 @@ public class Holding {
 
         this.quantity = totalQuantity;
         this.averagePrice = totalAmount / totalQuantity;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    /**
+     * 매도 수량만큼 보유 수량을 차감한다. 평균 매입가는 변하지 않는다.
+     * 보유 수량보다 많이 매도하려 하면 예외를 던진다.
+     */
+    public void sell(Long quantity) {
+        if (this.quantity < quantity) {
+            throw new BusinessException(ErrorCode.INSUFFICIENT_HOLDING);
+        }
+
+        this.quantity -= quantity;
         this.updatedAt = LocalDateTime.now();
     }
 }

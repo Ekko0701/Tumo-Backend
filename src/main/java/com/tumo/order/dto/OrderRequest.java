@@ -17,7 +17,7 @@ public record OrderRequest(
         @Min(value = 1, message = "주문 수량은 1 이상이어야 합니다.")
         Long quantity,
 
-        @Schema(description = "주문 유형. Phase 1에서는 BUY만 지원", example = "BUY")
+        @Schema(description = "주문 유형 (BUY: 매수, SELL: 매도)", example = "BUY")
         @NotNull(message = "주문 유형은 필수입니다.")
         OrderType orderType
 ) {

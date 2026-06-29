@@ -54,6 +54,11 @@ public enum ErrorCode {
     INSUFFICIENT_CASH(HttpStatus.BAD_REQUEST, "INSUFFICIENT_CASH", "현금 잔고가 부족합니다."),
 
     /**
+     * 매도 주문 수량이 사용자의 보유 수량보다 큰 경우.
+     */
+    INSUFFICIENT_HOLDING(HttpStatus.BAD_REQUEST, "INSUFFICIENT_HOLDING", "보유 수량이 부족합니다."),
+
+    /**
      * 주문 체결에 사용할 최신 현재가를 조회할 수 없는 경우.
      */
     STOCK_PRICE_UNAVAILABLE(

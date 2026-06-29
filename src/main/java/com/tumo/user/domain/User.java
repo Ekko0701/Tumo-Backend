@@ -60,4 +60,9 @@ public class User {
         this.cashBalance -= amount;
         this.updatedAt = LocalDateTime.now();
     }
+
+    public void increaseCashBalance(Long amount) {
+        this.cashBalance += amount;
+        this.updatedAt = LocalDateTime.now();
+    }
 }

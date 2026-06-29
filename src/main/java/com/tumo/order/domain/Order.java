@@ -49,20 +49,51 @@ public class Order {
     @Column(name = "total_amount", nullable = false)
     private Long totalAmount;
 
+    @Column(name = "realized_profit")
+    private Long realizedProfit;
+
     @Column(name = "executed_at", nullable = false)
     private LocalDateTime executedAt;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    public Order(User user, Stock stock, OrderType orderType, Long quantity, Long executedPrice) {
+    private Order(
+            User user,
+            Stock stock,
+            OrderType orderType,
+            Long quantity,
+            Long executedPrice,
+            Long realizedProfit
+    ) {
         this.user = user;
         this.stock = stock;
         this.orderType = orderType;
         this.quantity = quantity;
         this.executedPrice = executedPrice;
         this.totalAmount = executedPrice * quantity;
+        this.realizedProfit = realizedProfit;
         this.executedAt = LocalDateTime.now();
         this.createdAt = LocalDateTime.now();
+    }
+
+    /**
+     * 매수 주문을 생성한다. 실현손익은 없다(null).
+     */
+    public static Order buy(User user, Stock stock, Long quantity, Long executedPrice) {
+        return new Order(user, stock, OrderType.BUY, quantity, executedPrice, null);
+    }
+
+    /**
+     * 매도 주문을 생성한다. 실현손익 = (체결가 - 평균매입가) × 수량.
+     */
+    public static Order sell(
+            User user,
+            Stock stock,
+            Long quantity,
+            Long executedPrice,
+            Long realizedProfit
+    ) {
+        return new Order(user, stock, OrderType.SELL, quantity, executedPrice, realizedProfit);
     }
 }
