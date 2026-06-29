@@ -25,6 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class OrderService {
 
+    private static final int MAX_PAGE_SIZE = 100;
+
     private final UserRepository userRepository;
     private final StockRepository stockRepository;
     private final OrderRepository orderRepository;
@@ -96,8 +98,10 @@ public class OrderService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
+        int boundedPage = Math.max(page, 0);
+        int boundedSize = Math.min(Math.max(size, 1), MAX_PAGE_SIZE);
         Page<Order> orderPage = orderRepository.findByUserOrderByExecutedAtDesc(
-                user, PageRequest.of(page, size));
+                user, PageRequest.of(boundedPage, boundedSize));
 
         return new OrderPageResponse(
                 orderPage.getContent().stream()

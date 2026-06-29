@@ -2,6 +2,7 @@ package com.tumo.order.dto;
 
 import com.tumo.order.domain.OrderType;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -15,6 +16,7 @@ public record OrderRequest(
         @Schema(description = "주문 수량", example = "10")
         @NotNull(message = "주문 수량은 필수입니다.")
         @Min(value = 1, message = "주문 수량은 1 이상이어야 합니다.")
+        @Max(value = 1_000_000, message = "주문 수량은 1,000,000 이하여야 합니다.")
         Long quantity,
 
         @Schema(description = "주문 유형 (BUY: 매수, SELL: 매도)", example = "BUY")

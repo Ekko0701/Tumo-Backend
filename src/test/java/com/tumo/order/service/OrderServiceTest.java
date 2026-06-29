@@ -461,4 +461,26 @@ class OrderServiceTest {
         assertThat(response.size()).isEqualTo(30);
         assertThat(response.hasNext()).isFalse();
     }
+
+    @Test
+    void getOrdersClampsOversizedPageSize() {
+        User user = new User("test@example.com", "encoded-password", "tester");
+        ReflectionTestUtils.setField(user, "id", 1L);
+        Stock stock = new Stock(
+                "005930",
+                "삼성전자",
+                Market.KOSPI,
+                75000L,
+                LocalDateTime.of(2026, 5, 13, 15, 30)
+        );
+        Order order = Order.buy(user, stock, 1L, 75000L);
+        ReflectionTestUtils.setField(order, "id", 1L);
+        given(userRepository.findById(1L)).willReturn(Optional.of(user));
+        given(orderRepository.findByUserOrderByExecutedAtDesc(eq(user), any(Pageable.class)))
+                .willReturn(new PageImpl<>(List.of(order), PageRequest.of(0, 100), 1));
+
+        orderService.getOrders(1L, 0, 1000);
+
+        verify(orderRepository).findByUserOrderByExecutedAtDesc(user, PageRequest.of(0, 100));
+    }
 }
