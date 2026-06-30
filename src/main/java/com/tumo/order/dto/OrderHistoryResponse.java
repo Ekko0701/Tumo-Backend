@@ -4,8 +4,8 @@ import com.tumo.order.domain.Order;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 
-@Schema(description = "주문 응답")
-public record OrderResponse(
+@Schema(description = "주문 내역 응답")
+public record OrderHistoryResponse(
         @Schema(description = "주문 ID", example = "1")
         Long orderId,
 
@@ -30,15 +30,12 @@ public record OrderResponse(
         @Schema(description = "실현손익 (매도 주문만 존재, 매수는 null)", example = "50000")
         Long realizedProfit,
 
-        @Schema(description = "주문 후 현금 잔고", example = "9250000")
-        Long cashBalance,
-
         @Schema(description = "체결 시각", example = "2026-05-13T17:20:00")
         LocalDateTime executedAt
 ) {
 
-    public static OrderResponse from(Order order, Long cashBalance) {
-        return new OrderResponse(
+    public static OrderHistoryResponse from(Order order) {
+        return new OrderHistoryResponse(
                 order.getId(),
                 order.getStock().getStockCode(),
                 order.getStock().getStockName(),
@@ -47,7 +44,6 @@ public record OrderResponse(
                 order.getExecutedPrice(),
                 order.getTotalAmount(),
                 order.getRealizedProfit(),
-                cashBalance,
                 order.getExecutedAt()
         );
     }
