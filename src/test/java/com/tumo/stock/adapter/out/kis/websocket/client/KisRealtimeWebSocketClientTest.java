@@ -101,7 +101,9 @@ class KisRealtimeWebSocketClientTest {
                 "75000",
                 "0",
                 "0",
-                "1234567"
+                "50",
+                "1234567",
+                "92592592500"
         );
     }
 

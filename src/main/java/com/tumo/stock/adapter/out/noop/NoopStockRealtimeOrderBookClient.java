@@ -32,7 +32,7 @@ public class NoopStockRealtimeOrderBookClient implements StockRealtimeOrderBookC
      * @param stockCodes 구독을 해제할 종목 코드 목록
      */
     @Override
-    public void unsubscribe(Collection<String> stockCodes) {
+    public void unsubscribeOrderBook(Collection<String> stockCodes) {
         log.debug("Stock realtime order book client is not configured yet. stockCodes={}", stockCodes);
     }
 }

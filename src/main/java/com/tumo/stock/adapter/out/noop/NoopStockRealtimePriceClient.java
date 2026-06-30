@@ -32,7 +32,7 @@ public class NoopStockRealtimePriceClient implements StockRealtimePriceClient {
      * @param stockCodes 구독을 해제할 종목 코드 목록
      */
     @Override
-    public void unsubscribe(Collection<String> stockCodes) {
+    public void unsubscribePrice(Collection<String> stockCodes) {
         log.debug("Stock realtime price client is not configured yet. stockCodes={}", stockCodes);
     }
 }

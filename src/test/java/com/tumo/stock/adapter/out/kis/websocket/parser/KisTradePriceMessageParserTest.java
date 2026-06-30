@@ -22,6 +22,7 @@ class KisTradePriceMessageParserTest {
         assertThat(event.price().changePrice()).isEqualTo(100L);
         assertThat(event.price().changeRate()).isEqualByComparingTo("0.13");
         assertThat(event.price().tradeVolume()).isEqualTo(1234567L);
+        assertThat(event.price().tradeAmount()).isEqualTo(92592592500L);
         assertThat(event.price().priceChangedAt().getHour()).isEqualTo(9);
         assertThat(event.price().priceChangedAt().getMinute()).isEqualTo(30);
     }
@@ -66,7 +67,9 @@ class KisTradePriceMessageParserTest {
                 "75000",
                 "0",
                 "0",
-                "1234567"
+                "50",
+                "1234567",
+                "92592592500"
         );
     }
 }

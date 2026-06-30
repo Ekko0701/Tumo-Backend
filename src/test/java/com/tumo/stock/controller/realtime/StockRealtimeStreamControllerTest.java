@@ -1,6 +1,8 @@
 package com.tumo.stock.controller.realtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
@@ -40,26 +42,28 @@ class StockRealtimeStreamControllerTest {
     void streamRealtimePrices() {
         SseEmitter expectedEmitter = new SseEmitter();
         List<String> stockCodes = List.of("005930", "000660");
-        given(stockPriceSseEmitterRegistry.connect(stockCodes)).willReturn(expectedEmitter);
+        given(stockPriceSseEmitterRegistry.connect(eq(stockCodes), any(Runnable.class)))
+                .willReturn(expectedEmitter);
 
         SseEmitter emitter = stockRealtimeStreamController.streamRealtimePrices(stockCodes);
 
         assertThat(emitter).isEqualTo(expectedEmitter);
         InOrder inOrder = Mockito.inOrder(stockPriceSubscriptionService, stockPriceSseEmitterRegistry);
         inOrder.verify(stockPriceSubscriptionService).subscribe(stockCodes);
-        inOrder.verify(stockPriceSseEmitterRegistry).connect(stockCodes);
+        inOrder.verify(stockPriceSseEmitterRegistry).connect(eq(stockCodes), any(Runnable.class));
     }
 
     @Test
     void streamRealtimeOrderBook() {
         SseEmitter expectedEmitter = new SseEmitter();
-        given(stockOrderBookSseEmitterRegistry.connect("005930")).willReturn(expectedEmitter);
+        given(stockOrderBookSseEmitterRegistry.connect(eq("005930"), any(Runnable.class)))
+                .willReturn(expectedEmitter);
 
         SseEmitter emitter = stockRealtimeStreamController.streamRealtimeOrderBook("005930");
 
         assertThat(emitter).isEqualTo(expectedEmitter);
         InOrder inOrder = Mockito.inOrder(stockOrderBookSubscriptionService, stockOrderBookSseEmitterRegistry);
         inOrder.verify(stockOrderBookSubscriptionService).subscribe("005930");
-        inOrder.verify(stockOrderBookSseEmitterRegistry).connect("005930");
+        inOrder.verify(stockOrderBookSseEmitterRegistry).connect(eq("005930"), any(Runnable.class));
     }
 }

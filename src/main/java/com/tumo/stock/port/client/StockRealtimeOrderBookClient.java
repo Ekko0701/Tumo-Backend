@@ -21,5 +21,5 @@ public interface StockRealtimeOrderBookClient {
      *
      * @param stockCodes 구독을 해제할 종목 코드 목록
      */
-    void unsubscribe(Collection<String> stockCodes);
+    void unsubscribeOrderBook(Collection<String> stockCodes);
 }
